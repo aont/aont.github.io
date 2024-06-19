@@ -1,0 +1,114 @@
+<html>
+<head>
+<title>Clipboard</title>
+<script>
+window.addEventListener('load', (event) => {
+
+  var readClipboardTextarea = document.createElement("textarea");
+  readClipboardTextarea.style.width = "100%";
+  // readClipboardTextarea.style.height = "10lh";
+  // var rctScrollHeightMax = 0;
+
+  function rctAutoExpand(shrink=false) {
+    if(shrink) {
+      readClipboardTextarea.style.height = "";
+    }
+    var rctHeightSave = readClipboardTextarea.computedStyleMap().get("height").value;
+    if(rctHeightSave=="auto") rctHeightSave = 0;
+    // console.log({rctHeightSave});
+    // readClipboardTextarea.style.height = "";
+    var rctScrollHeight = readClipboardTextarea.scrollHeight
+    if(rctScrollHeight>rctHeightSave) {
+      readClipboardTextarea.style.height = (rctScrollHeight+2) + "px";
+      // rctScrollHeightMax = rctScrollHeight;
+    }
+  }
+  readClipboardTextarea.addEventListener("input", (event)=>{
+    console.log("input")
+    rctAutoExpand();
+  })
+  document.body.appendChild(readClipboardTextarea);
+
+  document.body.appendChild(document.createElement("br"));
+
+  var button = document.createElement("button");
+  button.innerText = "read plain text";
+  document.body.appendChild(button);
+  button.addEventListener("click", async (event) => {
+    var plainText = await navigator.clipboard.readText();
+    // readClipboardTextarea.style.height = "";
+    readClipboardTextarea.value = plainText;
+    rctAutoExpand(true);
+  });
+
+  document.body.appendChild(document.createElement("br"));
+
+  var button = document.createElement("button");
+  button.innerText = "read html";
+  document.body.appendChild(button);
+  button.addEventListener("click", async (event) => {
+    var data = await navigator.clipboard.read();
+    var blob = await data[0].getType("text/html");
+    var text = await blob.text()
+    // readClipboardTextarea.style.height = "";
+    readClipboardTextarea.value = text;
+    rctAutoExpand(true);
+  });
+
+  document.body.appendChild(document.createElement("br"));
+  
+  var button = document.createElement("button");
+  button.innerText = "write plain text"
+  document.body.appendChild(button);
+  button.addEventListener("click", async (event) => {
+    var plainText = readClipboardTextarea.value;
+    await navigator.clipboard.writeText(plainText);
+  });
+
+
+  document.body.appendChild(document.createElement("br"));
+
+  var button = document.createElement("button");
+  button.innerText = "write html";
+  document.body.appendChild(button);
+  button.addEventListener("click", async (event) => {
+    var htmlText = readClipboardTextarea.value;
+
+    var blobHtml = new Blob([htmlText], { type: "text/html" });
+    var blobPlain = new Blob(["HTML only"], { type: "text/plain" });
+    var data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain})];
+    await navigator.clipboard.write(data);
+  });
+  
+  document.body.appendChild(document.createElement("br"));
+
+  var fontSizeInput = document.createElement("input");
+  fontSizeInput.type = "number"
+  fontSizeInput.style.width = "6ch";
+  fontSizeInput.value = 13;
+  document.body.appendChild(fontSizeInput);
+
+  var button = document.createElement("button");
+  button.innerText = "set font size";
+  document.body.appendChild(button);
+  button.addEventListener("click", async (event) => {
+    var plainText = readClipboardTextarea.value;
+
+    var tempElem = document.createElement("span");
+    tempElem.innerText = plainText;
+    var htmlText = "<span style=\"font-size: " + fontSizeInput.value + ";\">" + tempElem.innerHTML + "</span>";
+
+    var blobHtml = new Blob([htmlText], { type: "text/html" });
+    var blobPlain = new Blob([htmlText], { type: "text/plain" });
+    var data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain })];
+    await navigator.clipboard.write(data);
+  });
+
+
+});
+</script>
+</head>
+<body></body>
+</html>
+
+
