@@ -34,7 +34,7 @@ window.addEventListener('load', (event) => {
     var div_end = "</div>";
     var br = "<br>";
     var text = readClipboardTextarea.value;
-    var htmlText = div_begin + text.split("\n").join(br+div_end+div_begin) + div_end;
+    var htmlText = div_begin + text.split("\n").join(br) + div_end;
 
     var blobHtml = new Blob([htmlText], { type: "text/html" });
     var blobPlain = new Blob([text], { type: "text/plain" });
