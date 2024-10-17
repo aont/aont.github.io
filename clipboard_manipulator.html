@@ -10,24 +10,24 @@ window.addEventListener('load', (event) => {
     // var rctScrollHeightMax = 0;
 
     function rctAutoExpand(shrink=false) {
-    if(shrink) {
-         textarea.style.height = "auto";
-         rctHeightSave = textarea.scrollHeight;
-    } else {
-        let rctHeightSave = textarea.computedStyleMap().get("height").value;
-        if (rctHeightSave == "auto") {
+        if(shrink) {
+            textarea.style.height = "auto";
             rctHeightSave = textarea.scrollHeight;
+        } else {
+            let rctHeightSave = textarea.computedStyleMap().get("height").value;
+            if (rctHeightSave == "auto") {
+                rctHeightSave = textarea.scrollHeight;
+            }
+        }
+        console.log({rctHeightSave});
+        textarea.style.height = "auto";
+        let rctScrollHeight = textarea.scrollHeight
+        console.log({rctScrollHeight});
+        textarea.style.height = rctHeightSave + "px";
+        if(rctScrollHeight>rctHeightSave) {
+            textarea.style.height = rctScrollHeight.toString() + "px";
         }
     }
-    console.log({rctHeightSave});
-    textarea.style.height = "auto";
-    let rctScrollHeight = textarea.scrollHeight
-    console.log({rctScrollHeight});
-    textarea.style.height = rctHeightSave + "px";
-    if(rctScrollHeight>rctHeightSave) {
-        textarea.style.height = rctScrollHeight.toString() + "px";
-    }
-}
     readClipboardTextarea.addEventListener("input", (event)=>{
         console.log("input")
         rctAutoExpand();
