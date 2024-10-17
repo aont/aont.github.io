@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS Minify</title>
+  <script src="https://cdn.jsdelivr.net/npm/terser@5.34/dist/bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.0/standalone.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.0/parser-babel.min.js"></script>
+</head>
+<body>
+<script>
+window.addEventListener('load', (event) => {
+    function textareaAutoExpand(targetTextarea, shrink=false) {
+        let rctHeightSave;
+        if(shrink) {
+            targetTextarea.style.height = "auto";
+            rctHeightSave = targetTextarea.scrollHeight;
+        } else {
+            rctHeightSave = targetTextarea.computedStyleMap().get("height").value;
+            if (rctHeightSave == "auto") {
+                rctHeightSave = targetTextarea.scrollHeight;
+            }
+        }
+        console.log({rctHeightSave});
+        targetTextarea.style.height = "auto";
+        const rctScrollHeight = targetTextarea.scrollHeight
+        console.log({rctScrollHeight});
+        targetTextarea.style.height = rctHeightSave + "px";
+        if(rctScrollHeight>rctHeightSave) {
+            targetTextarea.style.height = rctScrollHeight.toString() + "px";
+        }
+    }
+
+    const originalCodeTextarea = document.createElement("textarea");
+    originalCodeTextarea.style.width = "100%";
+    originalCodeTextarea.placeholder = "original code";
+    originalCodeTextarea.addEventListener("input", (event)=>{
+        // console.log("input")
+        textareaAutoExpand(originalCodeTextarea, true);
+    })
+    document.body.appendChild(originalCodeTextarea);
+
+    // document.body.appendChild(document.createElement("br"));
+
+    const buttonMinify = document.createElement("button");
+    buttonMinify.innerText = "minify";
+    buttonMinify.addEventListener("click", async function(ev) {
+        // (async function(ev) {
+        try {
+            statusArea.innerText = "";
+            let inputText;
+            if (originalCodeTextarea.value) {
+                console.log(originalCodeTextarea.value);
+                inputText = originalCodeTextarea.value;
+            } else {
+                inputText = await navigator.clipboard.readText();
+                console.log(inputText);
+            }
+            const result = await Terser.minify(inputText, {mangle: false, compress: true});
+            console.log(result.code);
+            minifiedCodeTextarea.value = result.code;
+            textareaAutoExpand(minifiedCodeTextarea, true);
+        } catch(error) {
+            console.log(error.stack)
+            console.log(error.message)
+            statusArea.innerText = error.stack + "\n\n" + error.message;
+        }
+        // })(ev);
+    });
+    document.body.appendChild(buttonMinify);
+
+
+    const buttonFormat = document.createElement("button");
+    buttonFormat.innerText = "format";
+    buttonFormat.addEventListener("click", async function(ev) {
+        // (async function(ev) {
+        try {
+            statusArea.innerText = "";
+            let minifiedCode = minifiedCodeTextarea.value;
+            if(!minifiedCode) return;
+            const formattedCode = prettier.format(minifiedCode, {
+                parser: "babel", 
+                semi: true,
+                singleQuote: true,
+                plugins: prettierPlugins
+            });
+            console.log(formattedCode);
+            originalCodeTextarea.value = formattedCode;
+            textareaAutoExpand(originalCodeTextarea, true);
+        } catch(error) {
+            console.log(error.stack)
+            console.log(error.message)
+            statusArea.innerText = error.stack + "\n\n" + error.message;
+        }
+        // })(ev);
+    });
+    document.body.appendChild(buttonFormat);
+
+
+
+    // document.body.appendChild(document.createElement("br"));
+
+    const minifiedCodeTextarea = document.createElement("textarea");
+    minifiedCodeTextarea.style.width = "100%";
+    minifiedCodeTextarea.placeholder = "minified code";
+    minifiedCodeTextarea.addEventListener("input", (event)=>{
+        textareaAutoExpand(minifiedCodeTextarea, true);
+    })
+    document.body.appendChild(minifiedCodeTextarea);
+
+
+    const statusArea = document.createElement("div")
+    document.body.appendChild(statusArea);
+});
+</script>
+</body>
+</html>
