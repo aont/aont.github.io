@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terser in Browser</title>
+  <script src="https://cdn.jsdelivr.net/npm/terser@5.34/dist/bundle.min.js"></script>
+</head>
+<body>
+<script>
+const textarea = document.createElement("textarea");
+textarea.style.width = "100%";
+function rctAutoExpand(shrink=false) {
+    if(shrink) {
+         textarea.style.height = "auto";
+         rctHeightSave = textarea.scrollHeight;
+    } else {d
+        let rctHeightSave = textarea.computedStyleMap().get("height").value;
+        if (rctHeightSave == "auto") {
+            rctHeightSave = textarea.scrollHeight;
+        }
+    }
+    console.log({rctHeightSave});
+    textarea.style.height = "auto";
+    let rctScrollHeight = textarea.scrollHeight
+    console.log({rctScrollHeight});
+    textarea.style.height = rctHeightSave + "px";
+    if(rctScrollHeight>rctHeightSave) {
+        textarea.style.height = rctScrollHeight.toString() + "px";
+    }
+}
+textarea.addEventListener("input", (event)=>{
+  console.log("input")
+  rctAutoExpand(true);
+})
+document.body.appendChild(textarea);
+
+document.body.appendChild(document.createElement("br"));
+
+const buttonMinify = document.createElement("button");
+buttonMinify.innerText = "minify";
+buttonMinify.addEventListener("click", function(ev) {
+    (async function(ev) {
+        try {
+            statusArea.innerText = "";
+            var inputText;
+            if (textarea.value) {
+                console.log(textarea.value);
+                inputText = textarea.value;
+            } else {
+                inputText = await navigator.clipboard.readText();
+                console.log(inputText);
+            }
+            let result = await Terser.minify(inputText);
+            console.log(result.code);
+            textarea.value = result.code;
+            rctAutoExpand(true);
+        } catch(e) {
+            statusArea.innerText = e.toString();
+        }
+    })(ev);
+});
+document.body.appendChild(buttonMinify);
+
+let statusArea = document.createElement("div")
+document.body.appendChild(statusArea);
+
+</script>
+</body>
+</html>
