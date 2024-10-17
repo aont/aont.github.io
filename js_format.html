@@ -44,7 +44,7 @@ window.addEventListener('load', (event) => {
     // document.body.appendChild(document.createElement("br"));
 
     const buttonMinify = document.createElement("button");
-    buttonMinify.innerText = "minify";
+    buttonMinify.innerHTML = "minify &darr;";
     buttonMinify.addEventListener("click", async function(ev) {
         // (async function(ev) {
         try {
@@ -72,7 +72,7 @@ window.addEventListener('load', (event) => {
 
 
     const buttonFormat = document.createElement("button");
-    buttonFormat.innerText = "format";
+    buttonFormat.innerHTML = "format &uarr;";
     buttonFormat.addEventListener("click", async function(ev) {
         // (async function(ev) {
         try {
