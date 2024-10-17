@@ -3,45 +3,52 @@
 <title>Clipboard</title>
 <script>
 window.addEventListener('load', (event) => {
+    var readClipboardTextarea = document.createElement("textarea");
+    readClipboardTextarea.style.width = "100%";
 
-  var readClipboardTextarea = document.createElement("textarea");
-  readClipboardTextarea.style.width = "100%";
-
-  function rctAutoExpand(shrink=false) {
-    if(shrink) {
-      readClipboardTextarea.style.height = "";
+    function rctAutoExpand(shrink=false) {
+        if(shrink) {
+            textarea.style.height = "auto";
+            rctHeightSave = textarea.scrollHeight;
+        } else {
+            let rctHeightSave = textarea.computedStyleMap().get("height").value;
+            if (rctHeightSave == "auto") {
+                rctHeightSave = textarea.scrollHeight;
+            }
+        }
+        console.log({rctHeightSave});
+        textarea.style.height = "auto";
+        let rctScrollHeight = textarea.scrollHeight
+        console.log({rctScrollHeight});
+        textarea.style.height = rctHeightSave + "px";
+        if(rctScrollHeight>rctHeightSave) {
+            textarea.style.height = rctScrollHeight.toString() + "px";
+        }
     }
-    var rctHeightSave = readClipboardTextarea.computedStyleMap().get("height").value;
-    if(rctHeightSave=="auto") rctHeightSave = 0;
-    var rctScrollHeight = readClipboardTextarea.scrollHeight
-    if(rctScrollHeight>rctHeightSave) {
-      readClipboardTextarea.style.height = (rctScrollHeight+2) + "px";
-    }
-  }
-  readClipboardTextarea.addEventListener("input", (event)=>{
-    console.log("input")
-    rctAutoExpand();
-  })
-  document.body.appendChild(readClipboardTextarea);
+    readClipboardTextarea.addEventListener("input", (event)=>{
+        console.log("input")
+        rctAutoExpand();
+    })
+    document.body.appendChild(readClipboardTextarea);
 
-  document.body.appendChild(document.createElement("br"));
+    document.body.appendChild(document.createElement("br"));
 
-  var button = document.createElement("button");
-  button.innerText = "write html";
-  document.body.appendChild(button);
-  button.addEventListener("click", async (event) => {
-    var div_begin = "<div>";
-    var div_end = "</div>";
-    var br = "<br>";
-    var text = readClipboardTextarea.value;
-    var htmlText = div_begin + text.split("\n").join(br) + div_end;
+    var button = document.createElement("button");
+    button.innerText = "write html";
+    document.body.appendChild(button);
+    button.addEventListener("click", async (event) => {
+        var div_begin = "<div>";
+        var div_end = "</div>";
+        var br = "<br>";
+        var text = readClipboardTextarea.value;
+        var htmlText = div_begin + text.split("\n").join(br) + div_end;
 
-    var blobHtml = new Blob([htmlText], { type: "text/html" });
-    var blobPlain = new Blob([text], { type: "text/plain" });
-    var data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain})];
-    await navigator.clipboard.write(data);
-  });
-  
+        var blobHtml = new Blob([htmlText], { type: "text/html" });
+        var blobPlain = new Blob([text], { type: "text/plain" });
+        var data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain})];
+        await navigator.clipboard.write(data);
+    });
+    
 
 });
 </script>
