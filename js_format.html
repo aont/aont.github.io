@@ -11,6 +11,9 @@
 <body>
 <script>
 window.addEventListener('load', (event) => {
+
+    document.body.style.lineHeight = "0px";
+
     function textareaAutoExpand(targetTextarea, shrink=false) {
         let rctHeightSave;
         if(shrink) {
@@ -41,7 +44,7 @@ window.addEventListener('load', (event) => {
     })
     document.body.appendChild(originalCodeTextarea);
 
-    // document.body.appendChild(document.createElement("br"));
+    document.body.appendChild(document.createElement("br"));
 
     const buttonMinify = document.createElement("button");
     buttonMinify.innerHTML = "minify &darr;";
@@ -49,14 +52,15 @@ window.addEventListener('load', (event) => {
         // (async function(ev) {
         try {
             statusArea.innerText = "";
-            let inputText;
-            if (originalCodeTextarea.value) {
-                console.log(originalCodeTextarea.value);
-                inputText = originalCodeTextarea.value;
-            } else {
-                inputText = await navigator.clipboard.readText();
-                console.log(inputText);
-            }
+            let inputText = originalCodeTextarea.value;
+            if(!inputText) return;
+            // if (originalCodeTextarea.value) {
+            //     console.log(originalCodeTextarea.value);
+            //     inputText = originalCodeTextarea.value;
+            // } else {
+            //     inputText = await navigator.clipboard.readText();
+            //     console.log(inputText);
+            // }
             const result = await Terser.minify(inputText, {mangle: false, compress: true});
             console.log(result.code);
             minifiedCodeTextarea.value = result.code;
@@ -69,7 +73,6 @@ window.addEventListener('load', (event) => {
         // })(ev);
     });
     document.body.appendChild(buttonMinify);
-
 
     const buttonFormat = document.createElement("button");
     buttonFormat.innerHTML = "format &uarr;";
@@ -97,9 +100,7 @@ window.addEventListener('load', (event) => {
     });
     document.body.appendChild(buttonFormat);
 
-
-
-    // document.body.appendChild(document.createElement("br"));
+    document.body.appendChild(document.createElement("br"));
 
     const minifiedCodeTextarea = document.createElement("textarea");
     minifiedCodeTextarea.style.width = "100%";
