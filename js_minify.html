@@ -14,7 +14,7 @@ function rctAutoExpand(shrink=false) {
     if(shrink) {
          textarea.style.height = "auto";
          rctHeightSave = textarea.scrollHeight;
-    } else {d
+    } else {
         let rctHeightSave = textarea.computedStyleMap().get("height").value;
         if (rctHeightSave == "auto") {
             rctHeightSave = textarea.scrollHeight;
