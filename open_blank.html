@@ -1,0 +1,27 @@
+<html>
+<head>
+<script>
+window.addEventListener("load", function (e) {
+    // console.log(e)
+    let browserName;
+        if (navigator.userAgentData) {
+            let brandSpecific = navigator.userAgentData.brands.find((function (brand) {
+                return "Google Chrome" == brand.brand || "Microsoft Edge" == brand.brand
+            }));
+            browserName = brandSpecific ? brandSpecific.brand + " " + brandSpecific.version : navigator.userAgentData.brands.map((function (brand, index, array) {
+                return brand.brand + " " + brand.version
+            })).join(", ")
+        }
+        else browserName = navigator.userAgent;
+        let a = document.createElement("a");
+        a.onclick = function () {
+            let s = window.screen;
+            let w = window.open("about:blank", "_blank", "popup,location=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,width=300,height=100,left=" + s.availWidth.toString() + ",top=" + s.availHeight.toString())
+            w.document.write("<a href=about:blank target=_blank>" + browserName + "</a>");
+        };
+        a.click();
+        a.remove();    
+})
+</script>
+</head>
+</html>
