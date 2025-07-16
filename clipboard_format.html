@@ -1,59 +1,36 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Clipboard</title>
-<script>
-window.addEventListener('load', (event) => {
-    var readClipboardTextarea = document.createElement("textarea");
-    readClipboardTextarea.style.width = "100%";
-
-    function rctAutoExpand(shrink=false) {
-        if(shrink) {
-            textarea.style.height = "auto";
-            rctHeightSave = textarea.scrollHeight;
-        } else {
-            let rctHeightSave = textarea.computedStyleMap().get("height").value;
-            if (rctHeightSave == "auto") {
-                rctHeightSave = textarea.scrollHeight;
-            }
-        }
-        console.log({rctHeightSave});
-        textarea.style.height = "auto";
-        let rctScrollHeight = textarea.scrollHeight
-        console.log({rctScrollHeight});
-        textarea.style.height = rctHeightSave + "px";
-        if(rctScrollHeight>rctHeightSave) {
-            textarea.style.height = rctScrollHeight.toString() + "px";
-        }
-    }
-    readClipboardTextarea.addEventListener("input", (event)=>{
-        console.log("input")
-        rctAutoExpand();
-    })
-    document.body.appendChild(readClipboardTextarea);
-
-    document.body.appendChild(document.createElement("br"));
-
-    var button = document.createElement("button");
-    button.innerText = "write html";
-    document.body.appendChild(button);
-    button.addEventListener("click", async (event) => {
-        var div_begin = "<div>";
-        var div_end = "</div>";
-        var br = "<br>";
-        var text = readClipboardTextarea.value;
-        var htmlText = div_begin + text.split("\n").join(br) + div_end;
-
-        var blobHtml = new Blob([htmlText], { type: "text/html" });
-        var blobPlain = new Blob([text], { type: "text/plain" });
-        var data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain})];
-        await navigator.clipboard.write(data);
-    });
-    
-
-});
-</script>
+<meta charset="utf-8">
+<title>Clipboard Processor</title>
 </head>
-<body></body>
+<body>
+
+<button id="process">Format and overwrite clipboard</button>
+<div id="log"></div>
+
+<script>
+function log(msg){
+  const t = new Date().toISOString().replace('T',' ');
+  document.getElementById('log').innerHTML += `[${t}] ${msg}<br>\n`;
+}
+
+async function processClipboard(){
+  try{
+    const text = await navigator.clipboard.readText();
+    if(!text){log("⚠ No text found in the clipboard"); return;}
+    log(`📥 Input detected (${text.length} characters)`);
+
+    const html = `<div>${text.replace(/\n/g,"<br>")}</div>`;
+    await navigator.clipboard.write([new ClipboardItem({
+      "text/plain": new Blob([text], {type:"text/plain"}),
+      "text/html" : new Blob([html], {type:"text/html"})
+    })]);
+    log("📤 Clipboard write completed");
+  }catch(e){ log(`💥 Error: ${e.message}`); }
+}
+
+document.getElementById('process').addEventListener('click', processClipboard);
+</script>
+</body>
 </html>
-
-
