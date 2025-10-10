@@ -1,0 +1,22 @@
+<html>
+<head>
+<script>
+window.addEventListener("load", (e) => {
+    let searchParams = new URL(location.href).searchParams;
+    let searchParamsTitle = searchParams.get('title');
+    let searchParamsUrl = searchParams.get('url');
+    console.log({searchParamsTitle, searchParamsUrl});
+    if (searchParamsTitle&&searchParamsUrl) {
+        let a = document.createElement("a");
+        a.style.fontSize = "15vw";
+        a.href = searchParamsUrl;
+        a.innerText = searchParamsTitle;
+        document.title = searchParamsTitle;
+        document.body.appendChild(a);
+    }
+});
+</script>
+</head>
+<body>
+</body>
+</html>
