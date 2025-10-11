@@ -6,11 +6,15 @@ window.addEventListener("load", (e) => {
     let searchParamsTitle = searchParams.get('title');
     let searchParamsUrl = searchParams.get('url');
     console.log({searchParamsTitle, searchParamsUrl});
-    if (searchParamsTitle&&searchParamsUrl) {
+    if (searchParamsUrl) {
         let a = document.createElement("a");
         a.style.fontSize = "15vw";
         a.href = searchParamsUrl;
-        a.innerText = searchParamsTitle;
+        if (searchParamsTitle) {
+            a.innerText = searchParamsTitle;
+        } else {
+            a.innerText = searchParamsUrl;
+        }
         document.title = searchParamsTitle;
         document.body.appendChild(a);
     }
