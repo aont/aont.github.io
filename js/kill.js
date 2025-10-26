@@ -7,4 +7,4 @@ location.href = "https://aont.github.io/suspend.html?title=" + encodeURIComponen
         }
         return faviconDict;
     }, {})))
-}, ""); void (0);
+}, "") + Array.from(document.querySelectorAll("html > head > meta[property=\"og:image\"]")).reduce(function (queryStr, meta) { return queryStr + "&ogimg=" + encodeURIComponent(meta.content); }, ""); void (0);

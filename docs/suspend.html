@@ -6,7 +6,8 @@ window.addEventListener("load", (e) => {
     let searchParamsTitle = searchParams.get('title');
     let searchParamsUrl = searchParams.get('url');
     let searchParamsFavicon = searchParams.getAll('favicon');
-    console.log({searchParamsTitle, searchParamsUrl, searchParamsFavicon});
+    let searchParamsOgimg = searchParams.get('ogimg');
+    console.log({searchParamsTitle, searchParamsUrl, searchParamsFavicon, searchParamsOgimg});
     if (searchParamsUrl) {
         let faviconHref;
         let faviconSvgHref;
@@ -29,17 +30,26 @@ window.addEventListener("load", (e) => {
         let a = document.createElement("a");
         a.style.fontSize = "15vw";
         a.href = searchParamsUrl;
-        if (faviconSvgHref) {
-            faviconHref = faviconSvgHref;
-        }
-        if (faviconHref) {
-            let faviconImg = document.createElement("img");
-            console.log(faviconHref);
-            faviconImg.src = faviconHref;
-            faviconImg.style.width = "15vw";
-            faviconImg.style.height = "auto";
-            faviconImg.style.verticalAlign = "sub";
-            a.appendChild(faviconImg);
+        console.log(searchParamsOgimg);
+        if (searchParamsOgimg) {
+            let img = document.createElement("img");
+            img.src = searchParamsOgimg;
+            img.style.width = "100%";
+            img.style.height = "auto";
+            a.appendChild(img);
+        } else {
+            if (faviconSvgHref) {
+                faviconHref = faviconSvgHref;
+            }
+            if (faviconHref) {
+                let faviconImg = document.createElement("img");
+                console.log(faviconHref);
+                faviconImg.src = faviconHref;
+                faviconImg.style.width = "15vw";
+                faviconImg.style.height = "auto";
+                faviconImg.style.verticalAlign = "sub";
+                a.appendChild(faviconImg);
+            }
         }
         a.appendChild(document.createTextNode(searchParamsTitle? searchParamsTitle: searchParamsUrl))
         if (searchParamsTitle) {
