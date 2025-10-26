@@ -5,7 +5,8 @@ window.addEventListener("load", (e) => {
     let searchParams = new URL(location.href).searchParams;
     let searchParamsTitle = searchParams.get('title');
     let searchParamsUrl = searchParams.get('url');
-    console.log({searchParamsTitle, searchParamsUrl});
+    let searchParamsFavicon = searchParams.getAll('favicon');
+    console.log({searchParamsTitle, searchParamsUrl, searchParamsFavicon});
     if (searchParamsUrl) {
         let a = document.createElement("a");
         a.style.fontSize = "15vw";
@@ -17,6 +18,17 @@ window.addEventListener("load", (e) => {
         }
         document.title = searchParamsTitle;
         document.body.appendChild(a);
+        
+        for(let i = 0; i < searchParamsFavicon.length; i++) {
+            const faviconDict = JSON.parse(searchParamsFavicon[i]);
+            console.log(faviconDict);
+            const link = document.createElement("link");
+            for (const [key, value] of Object.entries(faviconDict)) {
+                link.setAttribute(key, value);
+            }
+            document.head.appendChild(link);
+            console.log(link);
+        }
     }
 });
 </script>
