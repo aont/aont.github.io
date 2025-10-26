@@ -8,17 +8,8 @@ window.addEventListener("load", (e) => {
     let searchParamsFavicon = searchParams.getAll('favicon');
     console.log({searchParamsTitle, searchParamsUrl, searchParamsFavicon});
     if (searchParamsUrl) {
-        let a = document.createElement("a");
-        a.style.fontSize = "15vw";
-        a.href = searchParamsUrl;
-        if (searchParamsTitle) {
-            a.innerText = searchParamsTitle;
-        } else {
-            a.innerText = searchParamsUrl;
-        }
-        document.title = searchParamsTitle;
-        document.body.appendChild(a);
-        
+        let faviconHref;
+        let faviconSvgHref;
         for(let i = 0; i < searchParamsFavicon.length; i++) {
             const faviconDict = JSON.parse(searchParamsFavicon[i]);
             console.log(faviconDict);
@@ -26,9 +17,35 @@ window.addEventListener("load", (e) => {
             for (const [key, value] of Object.entries(faviconDict)) {
                 link.setAttribute(key, value);
             }
+            if (!faviconHref) {
+                faviconHref = faviconDict.href;
+            }
+            if (!faviconSvgHref && faviconDict.href.toLowerCase().endsWith(".svg")) {
+                faviconSvgHref = faviconDict.href;
+            }
             document.head.appendChild(link);
             console.log(link);
         }
+        let a = document.createElement("a");
+        a.style.fontSize = "15vw";
+        a.href = searchParamsUrl;
+        if (faviconSvgHref) {
+            faviconHref = faviconSvgHref;
+        }
+        if (faviconHref) {
+            let faviconImg = document.createElement("img");
+            console.log(faviconHref);
+            faviconImg.src = faviconHref;
+            faviconImg.style.width = "15vw";
+            faviconImg.style.height = "auto";
+            faviconImg.style.verticalAlign = "sub";
+            a.appendChild(faviconImg);
+        }
+        a.appendChild(document.createTextNode(searchParamsTitle? searchParamsTitle: searchParamsUrl))
+        if (searchParamsTitle) {
+            document.title = searchParamsTitle;
+        }
+        document.body.appendChild(a);
     }
 });
 </script>
