@@ -1,10 +1,10 @@
-location.href = "https://aont.github.io/suspend.html?title=" + encodeURIComponent(document.title) + "&url=" + encodeURIComponent(location.href) + Array.from(document.querySelectorAll("html > head > link[rel~=icon]")).reduce(function (a, c) {
-    return a + "&favicon=" + encodeURIComponent(JSON.stringify(Array.from(c.attributes).reduce(function (a, nv) {
-        if (nv.name == "href") {
-            a[nv.name] = new URL(nv.value, window.location.href).href;
+location.href = "https://aont.github.io/suspend.html?title=" + encodeURIComponent(document.title) + "&url=" + encodeURIComponent(location.href) + Array.from(document.querySelectorAll("html > head > link[rel~=icon]")).reduce(function (queryStr, link) {
+    return queryStr + "&favicon=" + encodeURIComponent(JSON.stringify(Array.from(link.attributes).reduce(function (faviconDict, attr) {
+        if (attr.name == "href") {
+            faviconDict[attr.name] = new URL(attr.value, window.location.href).href;
         } else {
-            a[nv.name] = nv.value;
+            faviconDict[attr.name] = attr.value;
         }
-        return a;
+        return faviconDict;
     }, {})))
 }, ""); void (0);
