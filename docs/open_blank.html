@@ -1,41 +1,70 @@
 <html>
 <head>
+<meta charset="utf-8" />
 <script>
-window.addEventListener("load", function (e) {
-    // console.log(e)
+window.addEventListener("load", function () {
+    // 1) Prefer the `message` query string if present
+    const params = new URLSearchParams(window.location.search);
+    const messageFromQuery = params.get("message"); // can be null
+
+    // 2) Fallback: detect browser name (legacy behavior)
     let browserName;
-    if (navigator.userAgentData) {
-        let brandSpecific = navigator.userAgentData.brands.find(function (brand) {
-            return "Google Chrome" == brand.brand || "Microsoft Edge" == brand.brand
+    if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
+        const brandSpecific = navigator.userAgentData.brands.find(function (brand) {
+            return brand && (brand.brand === "Google Chrome" || brand.brand === "Microsoft Edge");
         });
-        browserName = brandSpecific ? brandSpecific.brand + " " + brandSpecific.version : navigator.userAgentData.brands.map(function (brand, index, array) {
-            return brand.brand + " " + brand.version
-        }).join(", ")
-    }
-    else {
+        browserName = brandSpecific
+            ? (brandSpecific.brand + " " + brandSpecific.version)
+            : navigator.userAgentData.brands.map(function (brand) {
+                return brand.brand + " " + brand.version;
+            }).join(", ");
+    } else {
         browserName = navigator.userAgent;
     }
-    let a = document.createElement("a");
-    
-    let clickPromise = new Promise(function(resolve, reject) {
+
+    // 3) Decide the text to display
+    // If `message` is an empty string or only whitespace, fall back to browserName
+    const displayText = (messageFromQuery && messageFromQuery.trim().length > 0)
+        ? messageFromQuery
+        : browserName;
+
+    // 4) Click -> open popup -> show text -> go back (preserve original flow)
+    const a = document.createElement("a");
+
+    const clickPromise = new Promise(function(resolve) {
         a.addEventListener("click", function () {
-            let s = window.screen;
-            let w = window.open("about:blank", "_blank", "popup,location=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,width=300,height=100,left=" + s.availWidth.toString() + ",top=" + s.availHeight.toString())
-            w.document.write("<a href=about:blank target=_blank>" + browserName + "</a>");
+            const s = window.screen;
+            const w = window.open(
+                "about:blank",
+                "_blank",
+                "popup,location=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,width=300,height=100,left=" +
+                    s.availWidth.toString() + ",top=" + s.availHeight.toString()
+            );
+            // Avoid XSS: build elements and set textContent
+            const link = w.document.createElement("a");
+            link.href = "about:blank";
+            link.target = "_blank";
+            link.textContent = displayText;
+            w.document.body.appendChild(link);
             resolve(w);
             return false;
-        });
+        }, { once: true });
     });
+
+    // Trigger click programmatically
     a.click();
-    clickPromise.then(function(value) {
+
+    // After popup, remove the prompt link and navigate back
+    clickPromise.then(function () {
         a.remove();
         history.back();
     });
-    // let messageDiv = document.createElement("div");
+
+    // Fallback UI if popup is blocked
     a.href = "about:blocked";
-    a.innerHTML = "Please allow popping up windows.";
+    a.textContent = "Please allow popping up windows.";
     document.body.appendChild(a);
-})
+});
 </script>
 </head>
 <body></body>
