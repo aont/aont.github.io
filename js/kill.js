@@ -15,7 +15,7 @@
         // If that fails, ignore and keep using the current location
     }
 
-    // Collect favicon(s) and append to query (resolve relative hrefs against targetUrl)
+    // Collect favicon(s) and append to query (skip data URIs)
     let favQuery = Array.from(document.querySelectorAll('html > head > link[rel~=icon]')).reduce(function (queryStr, link) {
         let faviconObj = Array.from(link.attributes).reduce(function (acc, attr) {
             if (attr.name === 'href') {
@@ -29,12 +29,22 @@
             }
             return acc;
         }, {});
+
+        // Skip data URIs
+        if (faviconObj.href && faviconObj.href.startsWith('data:')) {
+            return queryStr;
+        }
+
         return queryStr + '&favicon=' + encodeURIComponent(JSON.stringify(faviconObj));
     }, '');
 
-    // Collect og:image meta tags
+    // Collect og:image meta tags (skip data URIs)
     let ogimgQuery = Array.from(document.querySelectorAll('html > head > meta[property="og:image"]')).reduce(function (q, meta) {
-        return q + '&ogimg=' + encodeURIComponent(meta.content || '');
+        let content = meta.content || '';
+        if (content.startsWith('data:')) {
+            return q;
+        }
+        return q + '&ogimg=' + encodeURIComponent(content);
     }, '');
 
     // Final redirect
