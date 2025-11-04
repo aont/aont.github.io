@@ -12,11 +12,13 @@
             }
         }
     } catch (e) {
-        // If that fails, ignore and keep using the current location
+        // ignore and use default targetUrl
     }
 
-    // Collect favicon(s) and append to query (skip data URIs)
-    let favQuery = Array.from(document.querySelectorAll('html > head > link[rel~=icon]')).reduce(function (queryStr, link) {
+    // Collect favicon(s), including apple-touch-icon, and normalize rel to "icon"
+    let favQuery = Array.from(
+        document.querySelectorAll('html > head > link[rel~=icon], html > head > link[rel~=apple-touch-icon]')
+    ).reduce(function (queryStr, link) {
         let faviconObj = Array.from(link.attributes).reduce(function (acc, attr) {
             if (attr.name === 'href') {
                 try {
@@ -24,6 +26,8 @@
                 } catch (e) {
                     acc[attr.name] = attr.value;
                 }
+            } else if (attr.name === 'rel') {
+                acc[attr.name] = 'icon'; // normalize rel value
             } else {
                 acc[attr.name] = attr.value;
             }
@@ -39,7 +43,9 @@
     }, '');
 
     // Collect og:image meta tags (skip data URIs)
-    let ogimgQuery = Array.from(document.querySelectorAll('html > head > meta[property="og:image"]')).reduce(function (q, meta) {
+    let ogimgQuery = Array.from(
+        document.querySelectorAll('html > head > meta[property="og:image"]')
+    ).reduce(function (q, meta) {
         let content = meta.content || '';
         if (content.startsWith('data:')) {
             return q;
