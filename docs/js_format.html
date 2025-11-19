@@ -59,7 +59,7 @@ window.addEventListener('load', (event) => {
             //     inputText = await navigator.clipboard.readText();
             //     console.log(inputText);
             // }
-            const result = await Terser.minify(inputText, {mangle: false, compress: true});
+            const result = await Terser.minify(inputText, {mangle: false, compress: {sequences: false}});
             console.log(result.code);
             minifiedCodeTextarea.value = result.code;
             textareaAutoExpand(minifiedCodeTextarea, true);
