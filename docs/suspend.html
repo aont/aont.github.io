@@ -38,6 +38,10 @@ window.addEventListener("load", (e) => {
             img.src = new URL(searchParamsOgimg, baseUrl).href;
             img.style.width = "100%";
             img.style.height = "auto";
+            img.style.display = "none";
+            img.addEventListener("load", () => {
+                img.style.display = "block";
+            });
             a.appendChild(img);
         } else {
             if (faviconSvgHref) {
