@@ -104,6 +104,22 @@
         params.append('favicon', JSON.stringify(faviconObj));
     });
 
+    // --- YouTube handling ---
+    // add https://i.ytimg.com/vi/{id}/hqdefault.jpg as ogimg.
+    try {
+        let cu = new URL(targetUrl);
+        if ((cu.hostname === 'www.youtube.com' || cu.hostname === 'm.youtube.com') && location.pathname === '/watch') {
+            const vid = cu.searchParams.get('v');
+            if (vid) {
+                const thumbUrl = 'https://i.ytimg.com/vi/' + vid + '/mqdefault.jpg';
+                params.append('ogimg', thumbUrl);
+            }
+        }
+    } catch (e) {
+        // If anything fails, just skip this special handling
+    }
+    // --- end YouTube mobile canonical handling ---
+
     // Collect og:image meta tags (skip data URIs)
     Array.from(
         document.querySelectorAll('html > head > meta[property="og:image"]')
