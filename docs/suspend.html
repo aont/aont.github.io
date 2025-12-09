@@ -76,6 +76,7 @@ window.addEventListener("load", (e) => {
 
         if (searchParamsOgimg) {
             let img = document.createElement("img");
+            img.setAttribute("referrerpolicy", "no-referrer");
             img.src = new URL(searchParamsOgimg, baseUrl).href;
             img.style.width = "100%";
             img.style.height = "auto";
@@ -86,6 +87,7 @@ window.addEventListener("load", (e) => {
             }
             if (faviconHref) {
                 let faviconImg = document.createElement("img");
+                img.setAttribute("referrerpolicy", "no-referrer");
                 console.log(faviconHref);
                 faviconImg.src = faviconHref;
                 faviconImg.style.width = "15vw";
