@@ -64,9 +64,39 @@
                 targetUrl = reload;
             }
         }
+    } catch (e) {}
+
+    // --- Determine targetUrl using og:url then canonical ---
+    try {
+        let candidate = null;
+
+        // 1. Open Graph URL
+        const ogUrlMeta = document.querySelector('html > head > meta[property="og:url"]');
+        if (ogUrlMeta && ogUrlMeta.content) {
+            candidate = ogUrlMeta.content;
+        }
+
+        // 2. Canonical URL
+        if (!candidate) {
+            const canonicalLink = document.querySelector('html > head > link[rel="canonical"]');
+            if (canonicalLink && canonicalLink.href) {
+                candidate = canonicalLink.href;
+            }
+        }
+
+        if (candidate) {
+            try {
+                const abs = new URL(candidate, location.href);
+                targetUrl = abs.href;
+            } catch (e) {
+                targetUrl = candidate;
+            }
+        }
+
     } catch (e) {
         // ignore and use default targetUrl
     }
+    // --- End targetUrl resolution ---
 
     // Build query using URLSearchParams
     const params = new URLSearchParams();
@@ -166,6 +196,7 @@
         }
     }
 
+    // Build final suspend URL
     const suspendUrl = 'https://aont.github.io/suspend.html?' + params.toString();
 
     // Final redirect
