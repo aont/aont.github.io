@@ -151,7 +151,7 @@
     // --- end YouTube mobile canonical handling ---
 
     // Collect og:image meta tags (skip data URIs)
-    let hasOgImage = false;
+    // let hasOgImage = false;
     Array.from(
         document.querySelectorAll('html > head > meta[property="og:image"]')
     ).forEach(function (meta) {
@@ -163,38 +163,8 @@
 
         // Append multiple og:image entries
         params.append('ogimg', content);
-        hasOgImage = true;
+        // hasOgImage = true;
     });
-
-    // If there is no og:image, fall back to the largest <img> by resolution
-    if (!hasOgImage) {
-        let bestImgSrc = null;
-        let bestPixels = 0;
-
-        Array.from(document.images).forEach(function (img) {
-            // Prefer currentSrc if available, then src
-            let src = img.currentSrc || img.src;
-            if (!src || src.startsWith('data:')) {
-                return;
-            }
-
-            const w = img.naturalWidth || img.width || 0;
-            const h = img.naturalHeight || img.height || 0;
-            const pixels = w * h;
-
-            if (pixels > bestPixels) {
-                bestPixels = pixels;
-                bestImgSrc = src;
-            }
-        });
-
-        if (bestImgSrc) {
-            try {
-                bestImgSrc = normalizeUrl(bestImgSrc, targetUrl);
-            } catch (e) { }
-            params.append('ogimg', bestImgSrc);
-        }
-    }
 
     // Build final suspend URL
     const suspendUrl = 'https://aont.github.io/suspend.html?' + params.toString();

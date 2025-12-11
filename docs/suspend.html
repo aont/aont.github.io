@@ -76,6 +76,8 @@ window.addEventListener("load", (e) => {
 
         if (searchParamsOgimg) {
             let img = document.createElement("img");
+            img.style.display = "none";
+            img.addEventListener("load", () => { img.style.display = "block"; });
             img.setAttribute("referrerpolicy", "no-referrer");
             img.src = new URL(searchParamsOgimg, baseUrl).href;
             img.style.width = "100%";
