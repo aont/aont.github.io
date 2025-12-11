@@ -89,7 +89,9 @@ window.addEventListener("load", (e) => {
             }
             if (faviconHref) {
                 let faviconImg = document.createElement("img");
-                img.setAttribute("referrerpolicy", "no-referrer");
+                faviconImg.style.display = "none";
+                faviconImg.addEventListener("load", () => { faviconImg.style.display = "block"; });
+                faviconImg.setAttribute("referrerpolicy", "no-referrer");
                 console.log(faviconHref);
                 faviconImg.src = faviconHref;
                 faviconImg.style.width = "15vw";
