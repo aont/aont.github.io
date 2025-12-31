@@ -5,8 +5,24 @@
         return urlObj.pathname + urlObj.search + urlObj.hash;
     }
 
+    // ChatGPT conversation URL detector
+    function isChatGPTUrl(u) {
+        try {
+            const urlObj = (u instanceof URL) ? u : new URL(u);
+            return urlObj.origin === 'https://chatgpt.com';
+        } catch (e) {
+            // Fallback for non-parseable strings
+            return (typeof u === 'string') && u.startsWith('https://chatgpt.com/');
+        }
+    }
+
     // Returns a shortened URL string based on targetUrl and baseUrl.
     function normalizeUrl(targetUrl, baseUrl) {
+        // If targetUrl itself is a ChatGPT conversation URL, always keep it as-is.
+        if (typeof targetUrl === 'string' && targetUrl.startsWith('https://chatgpt.com/')) {
+            return targetUrl;
+        }
+
         let base;
         try {
             base = new URL(baseUrl);
@@ -25,7 +41,12 @@
 
         // 1) If targetUrl is an absolute URL
         if (absoluteTarget) {
-            // If the origin matches baseUrl, return the domain-omitted form
+            // If it's a ChatGPT conversation URL, keep the full absolute URL
+            if (isChatGPTUrl(absoluteTarget)) {
+                return absoluteTarget.href;
+            }
+
+            // If the origin matches baseUrl, return the domain-omitted form (except the above case)
             if (absoluteTarget.origin === base.origin) {
                 return toDomainOmittedPath(absoluteTarget);
             }
@@ -41,6 +62,11 @@
             // If resolution fails, return targetUrl as-is
             return targetUrl;
         }
+
+        // If the resolved URL becomes a ChatGPT conversation URL, keep the full absolute URL
+        // if (isChatGPTUrl(resolved)) {
+        //     return resolved.href;
+        // }
 
         const domainOmitted = toDomainOmittedPath(resolved);
 
@@ -151,7 +177,6 @@
     // --- end YouTube mobile canonical handling ---
 
     // Collect og:image meta tags (skip data URIs)
-    // let hasOgImage = false;
     Array.from(
         document.querySelectorAll('html > head > meta[property="og:image"]')
     ).forEach(function (meta) {
@@ -163,7 +188,6 @@
 
         // Append multiple og:image entries
         params.append('ogimg', content);
-        // hasOgImage = true;
     });
 
     // Build final suspend URL
