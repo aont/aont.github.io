@@ -190,9 +190,6 @@
     // - "plain": 常にプレーンテキストとして貼り付け
     let pasteMode = "sanitize"; // "sanitize" | "plain"
 
-    // 追加: 色パレット操作でフォーカスが外れても選択範囲を復元できるように保持
-    let savedRange = null;
-
     function log(...args) { if (DEBUG) console.log(...args); }
     function group(label, fn) {
       if (!DEBUG) return fn();
@@ -257,7 +254,6 @@
         }
         console.log("pasteMode:", pasteMode);
         console.log("sanitizeOnLoad:", chkSanitizeOnLoad.checked);
-        console.log("savedRange:", savedRange ? "yes" : "no");
         console.log("editor.innerHTML (head 300):", editor.innerHTML.slice(0, 300));
       });
     }
@@ -309,46 +305,12 @@
       });
     }
 
-    // 追加: 選択範囲の保存/復元（色パレット操作でselectionが消える対策）
-    function saveSelectionRange() {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return false;
-
-      const r = sel.getRangeAt(0);
-      const ca = r.commonAncestorContainer;
-      const anc = ca && ca.nodeType === Node.TEXT_NODE ? ca.parentNode : ca;
-      if (!anc || !editor.contains(anc)) return false;
-
-      savedRange = r.cloneRange();
-      return true;
-    }
-
-    function restoreSelectionRange() {
-      if (!savedRange) return false;
-      const sel = window.getSelection();
-      if (!sel) return false;
-      sel.removeAllRanges();
-      sel.addRange(savedRange);
-      return true;
-    }
-
     function exec(cmd, value = null, meta = {}) {
       return group(`[exec] cmd=${cmd} value=${value} @ ${now()}`, () => {
         console.log("meta:", meta);
         console.log("before:", selectionSnapshot());
 
-        // 追加: 要求があれば選択範囲を復元してから実行（主に色パレット連動用）
-        if (meta && meta.restoreSelection) {
-          restoreSelectionRange();
-        }
-
         editor.focus();
-
-        // focusでselectionが崩れるブラウザ対策（もう一度）
-        if (meta && meta.restoreSelection) {
-          restoreSelectionRange();
-        }
-
         console.log("after focus:", selectionSnapshot());
 
         let ok = null;
@@ -550,26 +512,7 @@
     document.getElementById("btnBold").addEventListener("click", () => exec("bold", null, { from: "btnBold" }));
     document.getElementById("btnItalic").addEventListener("click", () => exec("italic", null, { from: "btnItalic" }));
     document.getElementById("btnUnderline").addEventListener("click", () => exec("underline", null, { from: "btnUnderline" }));
-
-    // 従来どおり: 「色適用」ボタンは残す
-    document.getElementById("btnApplyColor").addEventListener("click", () =>
-      exec("foreColor", colorPicker.value, { from: "btnApplyColor", restoreSelection: true })
-    );
-
-    // 追加: 色パレット変更をトリガーに、（エディタ内の）選択テキストへ即時適用
-    // - color input は操作中にフォーカスが移り selection が消える場合があるため、事前に保存→復元して適用
-    function applyColorFromPickerTrigger(from) {
-      // 直前にエディタ内で選択が保存されている場合のみ、自動適用する
-      if (!savedRange) return;
-      exec("foreColor", colorPicker.value, { from, auto: true, restoreSelection: true });
-    }
-
-    // 色パレットを開く前/フォーカス時点で選択を保存
-    colorPicker.addEventListener("pointerdown", () => { saveSelectionRange(); });
-    colorPicker.addEventListener("focus", () => { saveSelectionRange(); });
-
-    // 変更確定（ダイアログを閉じた時点）で適用
-    colorPicker.addEventListener("change", () => { applyColorFromPickerTrigger("colorPicker(change)"); });
+    document.getElementById("btnApplyColor").addEventListener("click", () => exec("foreColor", colorPicker.value, { from: "btnApplyColor" }));
 
     document.getElementById("btnLink").addEventListener("click", () => {
       const sel = selectionSnapshot();
@@ -647,7 +590,6 @@
       editor.focus();
       syncOutputs();
       syncActiveStates();
-      saveSelectionRange();
       dumpState("after load html");
     });
 
@@ -656,7 +598,6 @@
       const payload = getLoadPayload();
       editor.focus();
       exec("insertHTML", payload, { from: "insertAtCursor", sanitize: chkSanitizeOnLoad.checked });
-      saveSelectionRange();
     });
 
     // 新設：本当の末尾追加（末尾へキャレット移動→insertHTML）
@@ -664,7 +605,6 @@
       const payload = getLoadPayload();
       moveCaretToEnd(editor);
       exec("insertHTML", payload, { from: "appendToEnd", sanitize: chkSanitizeOnLoad.checked });
-      saveSelectionRange();
     });
 
     document.getElementById("btnFileToBox").addEventListener("click", () => {
@@ -677,17 +617,16 @@
     });
 
     // Editor events
-    editor.addEventListener("input", () => { syncOutputs(); syncActiveStates(); saveSelectionRange(); });
-    editor.addEventListener("keyup", () => { syncActiveStates(); saveSelectionRange(); });
-    editor.addEventListener("mouseup", () => { syncActiveStates(); saveSelectionRange(); });
-    editor.addEventListener("focus", () => { syncActiveStates(); saveSelectionRange(); });
+    editor.addEventListener("input", () => { syncOutputs(); syncActiveStates(); });
+    editor.addEventListener("keyup", () => syncActiveStates());
+    editor.addEventListener("mouseup", () => syncActiveStates());
+    editor.addEventListener("focus", () => syncActiveStates());
 
     // init
     console.log("[init] userAgent:", navigator.userAgent);
     dumpState("init");
     syncOutputs();
     syncActiveStates();
-    saveSelectionRange();
   </script>
 </body>
 </html>
