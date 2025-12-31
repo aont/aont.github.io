@@ -78,24 +78,24 @@
 <body>
   <div class="wrap">
     <div class="titlebar">
-      <h1>簡易HTMLエディタ</h1>
-      <div class="sub">contenteditable + execCommand / Debug + Sanitize / Load & Insert</div>
+      <h1 id="headingMain">簡易HTMLエディタ</h1>
+      <div class="sub" id="subHeading">contenteditable + execCommand / Debug + Sanitize / Load & Insert</div>
     </div>
 
     <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
       <select id="blockFormat" title="見出し/段落">
-        <option value="p">段落 (P)</option>
-        <option value="h1">H1</option>
-        <option value="h2">H2</option>
-        <option value="h3">H3</option>
+        <option id="optParagraph" value="p">段落 (P)</option>
+        <option id="optH1" value="h1">H1</option>
+        <option id="optH2" value="h2">H2</option>
+        <option id="optH3" value="h3">H3</option>
       </select>
 
       <button type="button" id="btnBold" title="太字 (Ctrl+B)">太字</button>
       <button type="button" id="btnItalic" title="斜体 (Ctrl+I)">斜体</button>
       <button type="button" id="btnUnderline" title="下線 (Ctrl+U)">下線</button>
 
-      <label title="文字色">
-        色:
+      <label id="colorLabel" title="文字色">
+        <span id="colorLabelText">色:</span>
         <input type="color" id="colorPicker" value="#24292f" />
       </label>
       <button type="button" id="btnApplyColor" title="選択範囲に色を適用">色適用</button>
@@ -125,24 +125,22 @@
     </div>
 
     <div id="editor" class="editor" contenteditable="true" spellcheck="false" aria-label="editable area">
-      <h2>ここを編集できます</h2>
-      <p>テキストを選択して、上のツールバーで <strong>太字</strong>、<em>斜体</em>、<u>下線</u>、<span style="color:#0969da;">色</span> を適用してください。</p>
-      <p>読み込み欄から HTML を「読み込み」「カーソル位置に挿入」「末尾に追加」できます。</p>
+      <div id="editorIntro"></div>
     </div>
 
     <div class="grid">
       <div>
-        <p class="panelTitle">HTML出力（editor.innerHTML）</p>
+        <p class="panelTitle" id="panelOutputTitle">HTML出力（editor.innerHTML）</p>
         <textarea id="htmlOut" readonly></textarea>
       </div>
       <div>
-        <p class="panelTitle">プレビュー（そのまま表示）</p>
+        <p class="panelTitle" id="panelPreviewTitle">プレビュー（そのまま表示）</p>
         <div id="preview" class="editor" style="min-height:220px;"></div>
       </div>
     </div>
 
     <div class="loadBox">
-      <p class="panelTitle">HTML読み込み（貼り付け／ファイル）</p>
+      <p class="panelTitle" id="panelLoadTitle">HTML読み込み（貼り付け／ファイル）</p>
       <div class="loadRow">
         <button type="button" id="btnLoadHtml" title="下のHTMLでエディタ内容を置換">HTML読み込み</button>
 
@@ -152,9 +150,9 @@
         <!-- 新設: 本当の末尾追加 -->
         <button type="button" id="btnAppendToEnd" title="末尾へキャレット移動してから追加">末尾に追加</button>
 
-        <label>
+        <label id="sanitizeLabel">
           <input type="checkbox" id="chkSanitizeOnLoad" checked />
-          読み込み/挿入時にSanitizeする
+          <span id="sanitizeLabelText">読み込み/挿入時にSanitizeする</span>
         </label>
 
         <div class="spacer"></div>
@@ -163,32 +161,238 @@
         <button type="button" id="btnFileToBox" title="選択ファイルを入力欄に読み込む">ファイル→入力欄</button>
       </div>
       <textarea id="htmlIn" placeholder="ここにHTMLを貼り付けて、上のボタンで読み込み/挿入してください。"></textarea>
-      <p class="hint">Sanitizeは許可タグ/属性に絞り込みます。無加工で読み込みたい場合はチェックを外してください。</p>
+      <p class="hint" id="sanitizeHint">Sanitizeは許可タグ/属性に絞り込みます。無加工で読み込みたい場合はチェックを外してください。</p>
     </div>
 
-    <p class="hint">
+    <p class="hint" id="shortcutHint">
       ショートカット例: <kbd>Ctrl</kbd>+<kbd>B</kbd>（太字） / <kbd>Ctrl</kbd>+<kbd>I</kbd>（斜体） / <kbd>Ctrl</kbd>+<kbd>U</kbd>（下線） / <kbd>Ctrl</kbd>+<kbd>Z</kbd>（Undo）
     </p>
   </div>
 
   <script>
+    const translations = {
+      ja: {
+        docLang: "ja",
+        docTitle: "簡易HTMLエディタ",
+        headingMain: "簡易HTMLエディタ",
+        subHeading: "contenteditable + execCommand / Debug + Sanitize / Load & Insert",
+        blockFormatTitle: "見出し/段落",
+        paragraph: "段落 (P)",
+        h1: "H1",
+        h2: "H2",
+        h3: "H3",
+        bold: { label: "太字", title: "太字 (Ctrl+B)" },
+        italic: { label: "斜体", title: "斜体 (Ctrl+I)" },
+        underline: { label: "下線", title: "下線 (Ctrl+U)" },
+        colorLabel: { title: "文字色", text: "色:" },
+        applyColor: { label: "色適用", title: "選択範囲に色を適用" },
+        link: { label: "リンク", title: "リンク挿入" },
+        unlink: { label: "解除", title: "リンク解除" },
+        ul: { label: "UL", title: "箇条書き" },
+        ol: { label: "番号付き", title: "番号付き" },
+        indent: { label: "→", title: "インデント" },
+        outdent: { label: "←", title: "アウトデント" },
+        pasteMode: { labelSanitize: "Paste: Sanitize", labelPlain: "Paste: Plain", title: "貼り付けをプレーンテキストに切り替え" },
+        undo: { label: "Undo", title: "Undo (Ctrl+Z)" },
+        redo: { label: "Redo", title: "Redo (Ctrl+Y / Ctrl+Shift+Z)" },
+        clearFormat: { label: "書式クリア", title: "書式だけ削除（テキストは残す）" },
+        clearAll: { label: "全消去", title: "本文を全消去" },
+        copyHtml: { label: "HTMLコピー", title: "HTMLをコピー" },
+        dump: { label: "Dump", title: "Selection/状態をダンプ" },
+        toggleDebug: { labelOn: "Debug: ON", labelOff: "Debug: OFF", title: "debugログをON/OFF" },
+        editorIntro: "<h2>ここを編集できます</h2><p>テキストを選択して、上のツールバーで <strong>太字</strong>、<em>斜体</em>、<u>下線</u>、<span style=\"color:#0969da;\">色</span> を適用してください。</p><p>読み込み欄から HTML を「読み込み」「カーソル位置に挿入」「末尾に追加」できます。</p>",
+        panelOutput: "HTML出力（editor.innerHTML）",
+        panelPreview: "プレビュー（そのまま表示）",
+        panelLoad: "HTML読み込み（貼り付け／ファイル）",
+        loadHtml: { label: "HTML読み込み", title: "下のHTMLでエディタ内容を置換" },
+        insertAtCursor: { label: "カーソル位置に挿入", title: "下のHTMLをカーソル位置に挿入" },
+        appendToEnd: { label: "末尾に追加", title: "末尾へキャレット移動してから追加" },
+        sanitizeCheckbox: { text: "読み込み/挿入時にSanitizeする" },
+        fileToBox: { label: "ファイル→入力欄", title: "選択ファイルを入力欄に読み込む" },
+        htmlInPlaceholder: "ここにHTMLを貼り付けて、上のボタンで読み込み/挿入してください。",
+        sanitizeHint: "Sanitizeは許可タグ/属性に絞り込みます。無加工で読み込みたい場合はチェックを外してください。",
+        shortcutHint: "ショートカット例: <kbd>Ctrl</kbd>+<kbd>B</kbd>（太字） / <kbd>Ctrl</kbd>+<kbd>I</kbd>（斜体） / <kbd>Ctrl</kbd>+<kbd>U</kbd>（下線） / <kbd>Ctrl</kbd>+<kbd>Z</kbd>（Undo）",
+        alerts: {
+          selectForLink: "エディタ内のテキストを選択してからリンクを設定してください。",
+          linkPrompt: "リンクURLを入力してください（例: https://example.com）",
+          invalidUrl: "無効なURLです。",
+          clearAllConfirm: "本文をすべて消去します。よろしいですか？",
+          copySuccess: "HTMLをクリップボードにコピーしました。",
+          copyFallback: "HTMLをコピーしました（フォールバック）。",
+          copyFailure: "コピーに失敗しました。Consoleを確認してください。",
+          selectFile: "ファイルを選択してください。",
+          fileLoadError: "ファイル読み込みに失敗しました。"
+        }
+      },
+      en: {
+        docLang: "en",
+        docTitle: "Simple HTML Editor",
+        headingMain: "Simple HTML Editor",
+        subHeading: "contenteditable + execCommand / Debug + Sanitize / Load & Insert",
+        blockFormatTitle: "Heading/Paragraph",
+        paragraph: "Paragraph (P)",
+        h1: "H1",
+        h2: "H2",
+        h3: "H3",
+        bold: { label: "Bold", title: "Bold (Ctrl+B)" },
+        italic: { label: "Italic", title: "Italic (Ctrl+I)" },
+        underline: { label: "Underline", title: "Underline (Ctrl+U)" },
+        colorLabel: { title: "Text color", text: "Color:" },
+        applyColor: { label: "Apply", title: "Apply color to selection" },
+        link: { label: "Link", title: "Insert link" },
+        unlink: { label: "Unlink", title: "Remove link" },
+        ul: { label: "UL", title: "Bullet list" },
+        ol: { label: "OL", title: "Numbered list" },
+        indent: { label: "→", title: "Indent" },
+        outdent: { label: "←", title: "Outdent" },
+        pasteMode: { labelSanitize: "Paste: Sanitize", labelPlain: "Paste: Plain", title: "Toggle paste as plain text" },
+        undo: { label: "Undo", title: "Undo (Ctrl+Z)" },
+        redo: { label: "Redo", title: "Redo (Ctrl+Y / Ctrl+Shift+Z)" },
+        clearFormat: { label: "Clear format", title: "Clear formatting only (keep text)" },
+        clearAll: { label: "Clear all", title: "Clear the entire content" },
+        copyHtml: { label: "Copy HTML", title: "Copy HTML" },
+        dump: { label: "Dump", title: "Dump selection/state" },
+        toggleDebug: { labelOn: "Debug: ON", labelOff: "Debug: OFF", title: "Toggle debug log" },
+        editorIntro: "<h2>You can edit here</h2><p>Select text and use the toolbar above to apply <strong>bold</strong>, <em>italic</em>, <u>underline</u>, and <span style=\"color:#0969da;\">color</span>.</p><p>Use the load box to \"Load\", \"Insert at cursor\", or \"Append to end\" HTML.</p>",
+        panelOutput: "HTML output (editor.innerHTML)",
+        panelPreview: "Preview (rendered as-is)",
+        panelLoad: "Load HTML (paste / file)",
+        loadHtml: { label: "Load HTML", title: "Replace editor content with the HTML below" },
+        insertAtCursor: { label: "Insert at cursor", title: "Insert HTML below at the cursor" },
+        appendToEnd: { label: "Append to end", title: "Move caret to end then append" },
+        sanitizeCheckbox: { text: "Sanitize when loading/inserting" },
+        fileToBox: { label: "File → input", title: "Load selected file into the input box" },
+        htmlInPlaceholder: "Paste HTML here, then use the buttons above to load/insert.",
+        sanitizeHint: "Sanitize keeps only allowed tags/attributes. Uncheck to load raw HTML.",
+        shortcutHint: "Shortcuts: <kbd>Ctrl</kbd>+<kbd>B</kbd> (bold) / <kbd>Ctrl</kbd>+<kbd>I</kbd> (italic) / <kbd>Ctrl</kbd>+<kbd>U</kbd> (underline) / <kbd>Ctrl</kbd>+<kbd>Z</kbd> (undo)",
+        alerts: {
+          selectForLink: "Select text in the editor before setting a link.",
+          linkPrompt: "Enter a link URL (e.g., https://example.com)",
+          invalidUrl: "Invalid URL.",
+          clearAllConfirm: "This will clear all content. Proceed?",
+          copySuccess: "Copied HTML to clipboard.",
+          copyFallback: "Copied HTML (fallback).",
+          copyFailure: "Failed to copy. Check the console.",
+          selectFile: "Please choose a file.",
+          fileLoadError: "Failed to load the file."
+        }
+      }
+    };
+
     const editor = document.getElementById("editor");
     const htmlOut = document.getElementById("htmlOut");
     const preview = document.getElementById("preview");
 
+    const headingMain = document.getElementById("headingMain");
+    const subHeading = document.getElementById("subHeading");
+
     const blockFormat = document.getElementById("blockFormat");
+    const optParagraph = document.getElementById("optParagraph");
+    const optH1 = document.getElementById("optH1");
+    const optH2 = document.getElementById("optH2");
+    const optH3 = document.getElementById("optH3");
     const colorPicker = document.getElementById("colorPicker");
+    const colorLabel = document.getElementById("colorLabel");
+    const colorLabelText = document.getElementById("colorLabelText");
 
     const htmlIn = document.getElementById("htmlIn");
     const chkSanitizeOnLoad = document.getElementById("chkSanitizeOnLoad");
+    const sanitizeLabelText = document.getElementById("sanitizeLabelText");
+    const sanitizeHint = document.getElementById("sanitizeHint");
     const fileHtml = document.getElementById("fileHtml");
+    const htmlIntro = document.getElementById("editorIntro");
+    const panelOutputTitle = document.getElementById("panelOutputTitle");
+    const panelPreviewTitle = document.getElementById("panelPreviewTitle");
+    const panelLoadTitle = document.getElementById("panelLoadTitle");
+    const shortcutHint = document.getElementById("shortcutHint");
+
+    const btnBold = document.getElementById("btnBold");
+    const btnItalic = document.getElementById("btnItalic");
+    const btnUnderline = document.getElementById("btnUnderline");
+    const btnApplyColor = document.getElementById("btnApplyColor");
+    const btnLink = document.getElementById("btnLink");
+    const btnUnlink = document.getElementById("btnUnlink");
+    const btnUL = document.getElementById("btnUL");
+    const btnOL = document.getElementById("btnOL");
+    const btnIndent = document.getElementById("btnIndent");
+    const btnOutdent = document.getElementById("btnOutdent");
+    const btnPasteMode = document.getElementById("btnPasteMode");
+    const btnUndo = document.getElementById("btnUndo");
+    const btnRedo = document.getElementById("btnRedo");
+    const btnClearFormat = document.getElementById("btnClearFormat");
+    const btnClearAll = document.getElementById("btnClearAll");
+    const btnCopyHtml = document.getElementById("btnCopyHtml");
+    const btnDump = document.getElementById("btnDump");
+    const btnToggleDebug = document.getElementById("btnToggleDebug");
+    const btnLoadHtml = document.getElementById("btnLoadHtml");
+    const btnInsertAtCursor = document.getElementById("btnInsertAtCursor");
+    const btnAppendToEnd = document.getElementById("btnAppendToEnd");
+    const btnFileToBox = document.getElementById("btnFileToBox");
 
     let DEBUG = true;
+    const defaultLang = (navigator.language && navigator.language.startsWith("ja")) ? "ja" : "en";
+    let i18n = translations[defaultLang] || translations.en;
+
+    function applyLanguage(langKey) {
+      i18n = translations[langKey] || translations.en;
+      const lang = i18n.docLang || langKey;
+      document.documentElement.lang = lang;
+      document.title = i18n.docTitle;
+
+      headingMain.textContent = i18n.headingMain;
+      subHeading.textContent = i18n.subHeading;
+
+      blockFormat.title = i18n.blockFormatTitle;
+      optParagraph.textContent = i18n.paragraph;
+      optH1.textContent = i18n.h1;
+      optH2.textContent = i18n.h2;
+      optH3.textContent = i18n.h3;
+
+      btnBold.textContent = i18n.bold.label; btnBold.title = i18n.bold.title;
+      btnItalic.textContent = i18n.italic.label; btnItalic.title = i18n.italic.title;
+      btnUnderline.textContent = i18n.underline.label; btnUnderline.title = i18n.underline.title;
+
+      colorLabel.title = i18n.colorLabel.title;
+      colorLabelText.textContent = i18n.colorLabel.text;
+      btnApplyColor.textContent = i18n.applyColor.label; btnApplyColor.title = i18n.applyColor.title;
+
+      btnLink.textContent = i18n.link.label; btnLink.title = i18n.link.title;
+      btnUnlink.textContent = i18n.unlink.label; btnUnlink.title = i18n.unlink.title;
+      btnUL.textContent = i18n.ul.label; btnUL.title = i18n.ul.title;
+      btnOL.textContent = i18n.ol.label; btnOL.title = i18n.ol.title;
+      btnIndent.textContent = i18n.indent.label; btnIndent.title = i18n.indent.title;
+      btnOutdent.textContent = i18n.outdent.label; btnOutdent.title = i18n.outdent.title;
+      btnPasteMode.title = i18n.pasteMode.title;
+      btnPasteMode.textContent = (pasteMode === "plain") ? i18n.pasteMode.labelPlain : i18n.pasteMode.labelSanitize;
+      btnUndo.textContent = i18n.undo.label; btnUndo.title = i18n.undo.title;
+      btnRedo.textContent = i18n.redo.label; btnRedo.title = i18n.redo.title;
+      btnClearFormat.textContent = i18n.clearFormat.label; btnClearFormat.title = i18n.clearFormat.title;
+      btnClearAll.textContent = i18n.clearAll.label; btnClearAll.title = i18n.clearAll.title;
+      btnCopyHtml.textContent = i18n.copyHtml.label; btnCopyHtml.title = i18n.copyHtml.title;
+      btnDump.textContent = i18n.dump.label; btnDump.title = i18n.dump.title;
+      btnToggleDebug.textContent = i18n.toggleDebug.labelOn; btnToggleDebug.title = i18n.toggleDebug.title;
+
+      htmlIntro.innerHTML = i18n.editorIntro;
+      panelOutputTitle.textContent = i18n.panelOutput;
+      panelPreviewTitle.textContent = i18n.panelPreview;
+      panelLoadTitle.textContent = i18n.panelLoad;
+
+      btnLoadHtml.textContent = i18n.loadHtml.label; btnLoadHtml.title = i18n.loadHtml.title;
+      btnInsertAtCursor.textContent = i18n.insertAtCursor.label; btnInsertAtCursor.title = i18n.insertAtCursor.title;
+      btnAppendToEnd.textContent = i18n.appendToEnd.label; btnAppendToEnd.title = i18n.appendToEnd.title;
+      sanitizeLabelText.textContent = i18n.sanitizeCheckbox.text;
+      btnFileToBox.textContent = i18n.fileToBox.label; btnFileToBox.title = i18n.fileToBox.title;
+      htmlIn.placeholder = i18n.htmlInPlaceholder;
+      sanitizeHint.textContent = i18n.sanitizeHint;
+      shortcutHint.innerHTML = i18n.shortcutHint;
+    }
 
     // Paste mode:
     // - "sanitize": HTMLを受け取ったらホワイトリストで整形しつつ貼り付け
     // - "plain": 常にプレーンテキストとして貼り付け
     let pasteMode = "sanitize"; // "sanitize" | "plain"
+
+    applyLanguage(defaultLang);
 
     function log(...args) { if (DEBUG) console.log(...args); }
     function group(label, fn) {
@@ -300,8 +504,7 @@
         const tag = getClosestBlockTag();
         if (tag) blockFormat.value = tag;
 
-        const pm = document.getElementById("btnPasteMode");
-        if (pm) pm.textContent = (pasteMode === "plain") ? "Paste: Plain" : "Paste: Sanitize";
+        if (btnPasteMode) btnPasteMode.textContent = (pasteMode === "plain") ? i18n.pasteMode.labelPlain : i18n.pasteMode.labelSanitize;
       });
     }
 
@@ -509,71 +712,71 @@
       exec("formatBlock", arg, { from: "blockFormat" });
     });
 
-    document.getElementById("btnBold").addEventListener("click", () => exec("bold", null, { from: "btnBold" }));
-    document.getElementById("btnItalic").addEventListener("click", () => exec("italic", null, { from: "btnItalic" }));
-    document.getElementById("btnUnderline").addEventListener("click", () => exec("underline", null, { from: "btnUnderline" }));
-    document.getElementById("btnApplyColor").addEventListener("click", () => exec("foreColor", colorPicker.value, { from: "btnApplyColor" }));
+    btnBold.addEventListener("click", () => exec("bold", null, { from: "btnBold" }));
+    btnItalic.addEventListener("click", () => exec("italic", null, { from: "btnItalic" }));
+    btnUnderline.addEventListener("click", () => exec("underline", null, { from: "btnUnderline" }));
+    btnApplyColor.addEventListener("click", () => exec("foreColor", colorPicker.value, { from: "btnApplyColor" }));
 
-    document.getElementById("btnLink").addEventListener("click", () => {
+    btnLink.addEventListener("click", () => {
       const sel = selectionSnapshot();
       if (!sel.ok || sel.rangeCount === 0 || !sel.inEditor) {
-        alert("エディタ内のテキストを選択してからリンクを設定してください。");
+        alert(i18n.alerts.selectForLink);
         return;
       }
-      const url = normalizeUrl(prompt("リンクURLを入力してください（例: https://example.com）", "https://"));
+      const url = normalizeUrl(prompt(i18n.alerts.linkPrompt, "https://"));
       if (!url) return;
-      if (!isSafeHref(url)) { alert("無効なURLです。"); return; }
+      if (!isSafeHref(url)) { alert(i18n.alerts.invalidUrl); return; }
       exec("createLink", url, { from: "btnLink" });
     });
-    document.getElementById("btnUnlink").addEventListener("click", () => exec("unlink", null, { from: "btnUnlink" }));
+    btnUnlink.addEventListener("click", () => exec("unlink", null, { from: "btnUnlink" }));
 
-    document.getElementById("btnUL").addEventListener("click", () => exec("insertUnorderedList", null, { from: "btnUL" }));
-    document.getElementById("btnOL").addEventListener("click", () => exec("insertOrderedList", null, { from: "btnOL" }));
-    document.getElementById("btnIndent").addEventListener("click", () => exec("indent", null, { from: "btnIndent" }));
-    document.getElementById("btnOutdent").addEventListener("click", () => exec("outdent", null, { from: "btnOutdent" }));
+    btnUL.addEventListener("click", () => exec("insertUnorderedList", null, { from: "btnUL" }));
+    btnOL.addEventListener("click", () => exec("insertOrderedList", null, { from: "btnOL" }));
+    btnIndent.addEventListener("click", () => exec("indent", null, { from: "btnIndent" }));
+    btnOutdent.addEventListener("click", () => exec("outdent", null, { from: "btnOutdent" }));
 
-    document.getElementById("btnUndo").addEventListener("click", () => exec("undo", null, { from: "btnUndo" }));
-    document.getElementById("btnRedo").addEventListener("click", () => exec("redo", null, { from: "btnRedo" }));
+    btnUndo.addEventListener("click", () => exec("undo", null, { from: "btnUndo" }));
+    btnRedo.addEventListener("click", () => exec("redo", null, { from: "btnRedo" }));
 
-    document.getElementById("btnClearFormat").addEventListener("click", () => {
+    btnClearFormat.addEventListener("click", () => {
       exec("removeFormat", null, { from: "btnClearFormat", step: "removeFormat" });
       exec("formatBlock", "<p>", { from: "btnClearFormat", step: "formatBlock<p>" });
     });
-    document.getElementById("btnClearAll").addEventListener("click", () => {
-      if (!confirm("本文をすべて消去します。よろしいですか？")) return;
+    btnClearAll.addEventListener("click", () => {
+      if (!confirm(i18n.alerts.clearAllConfirm)) return;
       editor.innerHTML = "<p><br></p>";
       editor.focus();
       syncOutputs();
       syncActiveStates();
     });
 
-    document.getElementById("btnCopyHtml").addEventListener("click", async () => {
+    btnCopyHtml.addEventListener("click", async () => {
       syncOutputs();
       try {
         await navigator.clipboard.writeText(htmlOut.value);
-        alert("HTMLをクリップボードにコピーしました。");
+        alert(i18n.alerts.copySuccess);
       } catch (e) {
         htmlOut.focus();
         htmlOut.select();
         try {
           document.execCommand("copy");
-          alert("HTMLをコピーしました（フォールバック）。");
+          alert(i18n.alerts.copyFallback);
         } catch (e2) {
-          alert("コピーに失敗しました。Consoleを確認してください。");
+          alert(i18n.alerts.copyFailure);
         } finally {
           editor.focus();
         }
       }
     });
 
-    document.getElementById("btnDump").addEventListener("click", () => dumpState("manual dump"));
-    document.getElementById("btnToggleDebug").addEventListener("click", (e) => {
+    btnDump.addEventListener("click", () => dumpState("manual dump"));
+    btnToggleDebug.addEventListener("click", (e) => {
       DEBUG = !DEBUG;
-      e.target.textContent = `Debug: ${DEBUG ? "ON" : "OFF"}`;
+      e.target.textContent = DEBUG ? i18n.toggleDebug.labelOn : i18n.toggleDebug.labelOff;
       console.log(`[debug] DEBUG=${DEBUG}`);
     });
 
-    document.getElementById("btnPasteMode").addEventListener("click", () => {
+    btnPasteMode.addEventListener("click", () => {
       pasteMode = (pasteMode === "sanitize") ? "plain" : "sanitize";
       syncActiveStates();
     });
@@ -584,7 +787,7 @@
       return chkSanitizeOnLoad.checked ? sanitizeHTML(raw) : raw;
     }
 
-    document.getElementById("btnLoadHtml").addEventListener("click", () => {
+    btnLoadHtml.addEventListener("click", () => {
       const payload = getLoadPayload();
       editor.innerHTML = payload || "<p><br></p>";
       editor.focus();
@@ -594,25 +797,25 @@
     });
 
     // 旧「末尾に追加」相当：カーソル位置に挿入
-    document.getElementById("btnInsertAtCursor").addEventListener("click", () => {
+    btnInsertAtCursor.addEventListener("click", () => {
       const payload = getLoadPayload();
       editor.focus();
       exec("insertHTML", payload, { from: "insertAtCursor", sanitize: chkSanitizeOnLoad.checked });
     });
 
     // 新設：本当の末尾追加（末尾へキャレット移動→insertHTML）
-    document.getElementById("btnAppendToEnd").addEventListener("click", () => {
+    btnAppendToEnd.addEventListener("click", () => {
       const payload = getLoadPayload();
       moveCaretToEnd(editor);
       exec("insertHTML", payload, { from: "appendToEnd", sanitize: chkSanitizeOnLoad.checked });
     });
 
-    document.getElementById("btnFileToBox").addEventListener("click", () => {
+    btnFileToBox.addEventListener("click", () => {
       const f = fileHtml.files && fileHtml.files[0];
-      if (!f) { alert("ファイルを選択してください。"); return; }
+      if (!f) { alert(i18n.alerts.selectFile); return; }
       const reader = new FileReader();
       reader.onload = () => { htmlIn.value = String(reader.result || ""); };
-      reader.onerror = () => alert("ファイル読み込みに失敗しました。");
+      reader.onerror = () => alert(i18n.alerts.fileLoadError);
       reader.readAsText(f);
     });
 
