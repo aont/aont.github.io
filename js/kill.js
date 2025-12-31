@@ -64,37 +64,44 @@
                 targetUrl = reload;
             }
         }
-    } catch (e) {}
+    } catch (e) { }
+
+    // --- Special handling for chatgpt.com ---
+    // If the URL starts with https://chatgpt.com/,
+    // do NOT use og:url or canonical and keep location.href as-is.
+    const isChatGPT = location.href.startsWith('https://chatgpt.com/');
 
     // --- Determine targetUrl using og:url then canonical ---
-    try {
-        let candidate = null;
+    if (!isChatGPT) {
+        try {
+            let candidate = null;
 
-        // 1. Open Graph URL
-        const ogUrlMeta = document.querySelector('html > head > meta[property="og:url"]');
-        if (ogUrlMeta && ogUrlMeta.content) {
-            candidate = ogUrlMeta.content;
-        }
-
-        // 2. Canonical URL
-        if (!candidate) {
-            const canonicalLink = document.querySelector('html > head > link[rel="canonical"]');
-            if (canonicalLink && canonicalLink.href) {
-                candidate = canonicalLink.href;
+            // 1. Open Graph URL
+            const ogUrlMeta = document.querySelector('html > head > meta[property="og:url"]');
+            if (ogUrlMeta && ogUrlMeta.content) {
+                candidate = ogUrlMeta.content;
             }
-        }
 
-        if (candidate) {
-            try {
-                const abs = new URL(candidate, location.href);
-                targetUrl = abs.href;
-            } catch (e) {
-                targetUrl = candidate;
+            // 2. Canonical URL
+            if (!candidate) {
+                const canonicalLink = document.querySelector('html > head > link[rel="canonical"]');
+                if (canonicalLink && canonicalLink.href) {
+                    candidate = canonicalLink.href;
+                }
             }
-        }
 
-    } catch (e) {
-        // ignore and use default targetUrl
+            if (candidate) {
+                try {
+                    const abs = new URL(candidate, location.href);
+                    targetUrl = abs.href;
+                } catch (e) {
+                    targetUrl = candidate;
+                }
+            }
+
+        } catch (e) {
+            // ignore and use default targetUrl
+        }
     }
     // --- End targetUrl resolution ---
 
