@@ -11,7 +11,7 @@
 <body>
 <script>
 window.addEventListener('load', (event) => {
-
+    const jsUri = "javascript:";
     function textareaAutoExpand(targetTextarea, shrink=false) {
         let rctHeightSave;
         if(shrink) {
@@ -63,6 +63,7 @@ window.addEventListener('load', (event) => {
             console.log(result.code);
             minifiedCodeTextarea.value = result.code;
             textareaAutoExpand(minifiedCodeTextarea, true);
+            bookmarkletAnchor.href = "javascript:" + encodeURI(result.code);
         } catch(error) {
             console.log(error.stack)
             console.log(error.message)
@@ -80,6 +81,9 @@ window.addEventListener('load', (event) => {
             statusArea.innerText = "";
             let minifiedCode = minifiedCodeTextarea.value;
             if(!minifiedCode) return;
+            if (minifiedCode.startsWith(jsUri)) {
+                minifiedCode = decodeURI(minifiedCode.substring(jsUri.length));
+            }
             const formattedCode = prettier.format(minifiedCode, {
                 parser: "babel", 
                 semi: true,
@@ -107,6 +111,11 @@ window.addEventListener('load', (event) => {
         textareaAutoExpand(minifiedCodeTextarea, true);
     })
     document.body.appendChild(minifiedCodeTextarea);
+
+    const bookmarkletAnchor = document.createElement("a");
+    bookmarkletAnchor.textContent = "bookmarklet"
+    bookmarkletAnchor.href = "about:blank"
+    document.body.appendChild(bookmarkletAnchor);
 
 
     const statusArea = document.createElement("div")
