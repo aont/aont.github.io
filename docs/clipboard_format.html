@@ -1,43 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Clipboard Processor</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Clipboard Processor</title>
+  <style>
+    :root{
+      --bg:#0b0f19;
+      --card:#121a2a;
+      --text:#e8eefc;
+      --muted:#a9b5d1;
+      --accent:#4f8cff;
+      --ok:#2ecc71;
+      --warn:#f1c40f;
+      --err:#e74c3c;
+      --radius:14px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    }
+    .container{
+      max-width: 680px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    h1{
+      font-size: 18px;
+      margin: 0 0 4px 0;
+    }
+    .desc{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    button{
+      width: 100%;
+      padding: 16px 14px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      touch-action: manipulation;
+    }
+    button:active{ transform: scale(0.99); }
+    button[disabled]{
+      opacity: .55;
+      transform: none;
+    }
+
+    .status{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
+    }
+    .pill.ok{ color: var(--ok); }
+    .pill.warn{ color: var(--warn); }
+    .pill.err{ color: var(--err); }
+
+    .log{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text);
+      background: rgba(255,255,255,.04);
+      border-radius: 12px;
+      padding: 10px;
+      max-height: 45vh;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .secondary{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.14);
+      background: transparent;
+      color: var(--text);
+      font-weight: 650;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <div class="card">
+      <h1>Clipboard Processor</h1>
+      <p class="desc">
+        Reads text from your clipboard, converts line breaks into <code>&lt;div&gt;</code>-based HTML, and writes both
+        <code>text/plain</code> and <code>text/html</code> back to the clipboard.<br>
+        Note: On mobile, clipboard permissions and HTML writes may be restricted depending on the browser.
+      </p>
+    </div>
 
-<button id="process">Format and overwrite clipboard</button>
-<div id="log"></div>
+    <button id="process" type="button">Format and overwrite clipboard</button>
+
+    <div class="card status">
+      <div class="row" style="width:100%">
+        <div id="status" class="pill">Idle</div>
+        <div class="row">
+          <span class="pill" id="len">Chars: -</span>
+          <span class="pill" id="ua">Mobile</span>
+        </div>
+      </div>
+      <button id="clear" type="button" class="secondary">Clear log</button>
+    </div>
+
+    <div class="card">
+      <div id="log" class="log" aria-live="polite"></div>
+    </div>
+  </div>
 
 <script>
-function log(msg){
-  const t = new Date().toISOString().replace('T',' ');
-  document.getElementById('log').innerHTML += `[${t}] ${msg}<br>\n`;
-}
+  const $process = document.getElementById('process');
+  const $clear = document.getElementById('clear');
+  const $log = document.getElementById('log');
+  const $status = document.getElementById('status');
+  const $len = document.getElementById('len');
+  const $ua = document.getElementById('ua');
 
-async function processClipboard(){
-  try{
-    const text = await navigator.clipboard.readText();
-    if(!text){log("⚠ No text found in the clipboard"); return;}
-    log(`📥 Input detected (${text.length} characters)`);
+  function nowStamp(){
+    const d = new Date();
+    const pad = (n)=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
 
-    const htmlText = text.split(/\r?\n/).reduce(function (a, c) {
-      if (c === "") {
-        c = "<br>";
-      }
+  function appendLog(msg){
+    const line = document.createElement('div');
+    line.textContent = `[${nowStamp()}] ${msg}`;
+    $log.appendChild(line);
+    $log.scrollTop = $log.scrollHeight;
+  }
+
+  function setStatus(text, cls){
+    $status.className = 'pill' + (cls ? ` ${cls}` : '');
+    $status.textContent = text;
+  }
+
+  function isMobile(){
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  $ua.textContent = isMobile() ? 'Mobile' : 'Desktop';
+
+  function toHtml(text){
+    // Keeps the original behavior: empty lines become <br>
+    return text.split(/\r?\n/).reduce((a, c) => {
+      if (c === "") c = "<br>";
       return a + "<div>" + c + "</div>";
     }, "");
+  }
 
-    console.log(htmlText);
-    await navigator.clipboard.write([new ClipboardItem({
-      "text/plain": new Blob([text], {type:"text/plain"}),
-      "text/html" : new Blob([htmlText], {type:"text/html"})
-    })]);
-    log("📤 Clipboard write completed");
-  }catch(e){ log(`💥 Error: ${e.message}`); }
-}
+  async function processClipboard(){
+    $process.disabled = true;
+    setStatus('Processing…', 'warn');
 
-document.getElementById('process').addEventListener('click', processClipboard);
+    try{
+      if (!navigator.clipboard){
+        throw new Error('Clipboard API is not available. Make sure you are running over HTTPS and that your browser supports it.');
+      }
+
+      // On mobile, readText() often requires a direct user gesture (tap)
+      const text = await navigator.clipboard.readText();
+
+      if(!text){
+        setStatus('Clipboard is empty', 'warn');
+        appendLog('⚠ No text found in the clipboard');
+        $len.textContent = 'Chars: 0';
+        return;
+      }
+
+      $len.textContent = `Chars: ${text.length}`;
+      appendLog(`📥 Input detected (${text.length} characters)`);
+
+      const htmlText = toHtml(text);
+
+      // write() / ClipboardItem may be unsupported or restricted on some mobile browsers
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/plain": new Blob([text], {type:"text/plain"}),
+        "text/html" : new Blob([htmlText], {type:"text/html"})
+      })]);
+
+      setStatus('Done', 'ok');
+      appendLog('📤 Clipboard write completed (text/plain + text/html)');
+
+    }catch(e){
+      setStatus('Failed', 'err');
+      appendLog(`💥 Error: ${e && e.message ? e.message : String(e)}`);
+      appendLog('Hint: Some browsers (notably iOS Safari) may restrict writing HTML to the clipboard. Try Android Chrome or a desktop browser if needed.');
+    }finally{
+      $process.disabled = false;
+    }
+  }
+
+  $process.addEventListener('click', processClipboard);
+  $clear.addEventListener('click', () => {
+    $log.textContent = '';
+    setStatus('Idle');
+    $len.textContent = 'Chars: -';
+  });
+
+  appendLog('Ready. Tap the button to process the clipboard.');
 </script>
 </body>
 </html>
