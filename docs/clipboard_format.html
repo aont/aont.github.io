@@ -21,10 +21,17 @@ async function processClipboard(){
     if(!text){log("⚠ No text found in the clipboard"); return;}
     log(`📥 Input detected (${text.length} characters)`);
 
-    const html = `<div>${text.replace(/\n/g,"<br>")}</div>`;
+    const htmlText = text.split(/\r?\n/).reduce(function (a, c) {
+      if (c === "") {
+        c = "<br>";
+      }
+      return a + "<div>" + c + "</div>";
+    }, "");
+
+    console.log(htmlText);
     await navigator.clipboard.write([new ClipboardItem({
       "text/plain": new Blob([text], {type:"text/plain"}),
-      "text/html" : new Blob([html], {type:"text/html"})
+      "text/html" : new Blob([htmlText], {type:"text/html"})
     })]);
     log("📤 Clipboard write completed");
   }catch(e){ log(`💥 Error: ${e.message}`); }
