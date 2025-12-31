@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Utility Page Directory</title>
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --card: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 32px 20px;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 24px;
+    }
+    p.lead {
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      max-width: 960px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .card a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 650;
+    }
+    .card a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Utility Page Directory</h1>
+  <p class="lead">Quick links to the standalone tools in this folder. Each card explains what the page does and links directly to the HTML file.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>ChatGPT Bookmarklet Generator</h2>
+      <p>Creates a bookmarklet that injects a multi-line prompt template into the ChatGPT prompt box so you can save and reuse prompts quickly.</p>
+      <a href="chatgpt_bookmarklet.html">Open chatgpt_bookmarklet.html →</a>
+    </div>
+
+    <div class="card">
+      <h2>Clipboard Processor</h2>
+      <p>Reads text from your clipboard, converts line breaks into <code>&lt;div&gt;</code>-based HTML, and writes both text and HTML back to the clipboard with status logging.</p>
+      <a href="clipboard_format.html">Open clipboard_format.html →</a>
+    </div>
+
+    <div class="card">
+      <h2>Clipboard Tool</h2>
+      <p>Mobile-friendly clipboard console with buttons to read or write plain text and HTML, view capability support, and manage the editable buffer.</p>
+      <a href="clipboard_manipulator.html">Open clipboard_manipulator.html →</a>
+    </div>
+
+    <div class="card">
+      <h2>JavaScript Minify / Format Tool</h2>
+      <p>In-browser utility that prettifies or minifies JavaScript using Prettier and Terser so you can clean up or compress snippets without a build step.</p>
+      <a href="js_format.html">Open js_format.html →</a>
+    </div>
+
+    <div class="card">
+      <h2>Open Blank Helper</h2>
+      <p>Triggers a popup to <code>about:blank</code> that shows a provided message (or the detected browser name) and then navigates back—useful for popup-behavior testing.</p>
+      <a href="open_blank.html">Open open_blank.html →</a>
+    </div>
+
+    <div class="card">
+      <h2>Suspend Viewer</h2>
+      <p>Renders a link preview from URL parameters by applying title, canonical URL, favicons, and optional Open Graph image into the document.</p>
+      <a href="suspend.html">Open suspend.html →</a>
+    </div>
+  </div>
+</body>
+</html>
