@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>簡易HTMLエディタ</title>
+  <style>
+    :root { --border:#d0d7de; --bg:#fff; --muted:#f6f8fa; --text:#24292f; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans JP", sans-serif; color:var(--text); }
+    .wrap { max-width:1100px; margin:24px auto; padding:0 16px; }
+
+    /* 追加: ツール名表示 */
+    .titlebar {
+      display:flex; align-items:baseline; gap:12px;
+      margin-bottom: 10px;
+    }
+    .titlebar h1 {
+      margin:0;
+      font-size: 20px;
+      letter-spacing: 0.2px;
+    }
+    .titlebar .sub {
+      color:#57606a;
+      font-size: 12px;
+    }
+
+    .toolbar {
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+      padding:12px; border:1px solid var(--border); background:var(--muted); border-radius:10px;
+    }
+    .toolbar button, .toolbar select, .toolbar input[type="color"], .toolbar label {
+      border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:8px 10px; font-size:14px;
+    }
+    .toolbar button { cursor:pointer; }
+    .toolbar button:hover { background:#f3f4f6; }
+    .toolbar button[aria-pressed="true"] { outline: 2px solid #0969da; outline-offset: 1px; }
+    .spacer { flex:1; }
+    .editor {
+      margin-top:12px; border:1px solid var(--border); border-radius:10px;
+      min-height:280px; padding:14px; background:var(--bg); line-height:1.7;
+    }
+    .editor:focus { outline:2px solid #0969da; outline-offset:2px; }
+    .grid { display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px; }
+    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
+    textarea {
+      width:100%; min-height:220px; resize:vertical; border:1px solid var(--border);
+      border-radius:10px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:13px; line-height:1.5;
+    }
+    .panelTitle { margin:0 0 6px 2px; font-size:13px; color:#57606a; }
+    .hint { margin:10px 2px 0; font-size:12px; color:#57606a; }
+    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      border:1px solid var(--border); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:#fff; }
+
+    /* 行間が広くなる問題対策 */
+    #editor p, #editor h1, #editor h2, #editor h3, #preview p, #preview h1, #preview h2, #preview h3 { margin: 0; }
+
+    .loadBox {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: var(--muted);
+    }
+    .loadRow {
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+      margin-bottom: 8px;
+    }
+    .loadRow input[type="file"] { border: none; padding: 0; background: transparent; }
+    .loadRow label {
+      display:flex; gap:8px; align-items:center;
+      border: none;
+      padding: 0;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="titlebar">
+      <h1>簡易HTMLエディタ</h1>
+      <div class="sub">contenteditable + execCommand / Debug + Sanitize / Load & Insert</div>
+    </div>
+
+    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+      <select id="blockFormat" title="見出し/段落">
+        <option value="p">段落 (P)</option>
+        <option value="h1">H1</option>
+        <option value="h2">H2</option>
+        <option value="h3">H3</option>
+      </select>
+
+      <button type="button" id="btnBold" title="太字 (Ctrl+B)">太字</button>
+      <button type="button" id="btnItalic" title="斜体 (Ctrl+I)">斜体</button>
+      <button type="button" id="btnUnderline" title="下線 (Ctrl+U)">下線</button>
+
+      <label title="文字色">
+        色:
+        <input type="color" id="colorPicker" value="#24292f" />
+      </label>
+      <button type="button" id="btnApplyColor" title="選択範囲に色を適用">色適用</button>
+
+      <button type="button" id="btnLink" title="リンク挿入">リンク</button>
+      <button type="button" id="btnUnlink" title="リンク解除">解除</button>
+
+      <button type="button" id="btnUL" title="箇条書き">UL</button>
+      <button type="button" id="btnOL" title="番号付き">OL</button>
+      <button type="button" id="btnIndent" title="インデント">→</button>
+      <button type="button" id="btnOutdent" title="アウトデント">←</button>
+
+      <button type="button" id="btnPasteMode" title="貼り付けをプレーンテキストに切り替え">Paste: Sanitize</button>
+
+      <div class="spacer"></div>
+
+      <button type="button" id="btnUndo" title="Undo (Ctrl+Z)">Undo</button>
+      <button type="button" id="btnRedo" title="Redo (Ctrl+Y / Ctrl+Shift+Z)">Redo</button>
+
+      <button type="button" id="btnClearFormat" title="書式だけ削除（テキストは残す）">書式クリア</button>
+      <button type="button" id="btnClearAll" title="本文を全消去">全消去</button>
+
+      <button type="button" id="btnCopyHtml" title="HTMLをコピー">HTMLコピー</button>
+
+      <button type="button" id="btnDump" title="Selection/状態をダンプ">Dump</button>
+      <button type="button" id="btnToggleDebug" title="debugログをON/OFF">Debug: ON</button>
+    </div>
+
+    <div id="editor" class="editor" contenteditable="true" spellcheck="false" aria-label="editable area">
+      <h2>ここを編集できます</h2>
+      <p>テキストを選択して、上のツールバーで <strong>太字</strong>、<em>斜体</em>、<u>下線</u>、<span style="color:#0969da;">色</span> を適用してください。</p>
+      <p>読み込み欄から HTML を「読み込み」「カーソル位置に挿入」「末尾に追加」できます。</p>
+    </div>
+
+    <div class="grid">
+      <div>
+        <p class="panelTitle">HTML出力（editor.innerHTML）</p>
+        <textarea id="htmlOut" readonly></textarea>
+      </div>
+      <div>
+        <p class="panelTitle">プレビュー（そのまま表示）</p>
+        <div id="preview" class="editor" style="min-height:220px;"></div>
+      </div>
+    </div>
+
+    <div class="loadBox">
+      <p class="panelTitle">HTML読み込み（貼り付け／ファイル）</p>
+      <div class="loadRow">
+        <button type="button" id="btnLoadHtml" title="下のHTMLでエディタ内容を置換">HTML読み込み</button>
+
+        <!-- 名称変更: 旧「末尾に追加」→ 実態どおり「カーソル位置に挿入」 -->
+        <button type="button" id="btnInsertAtCursor" title="下のHTMLをカーソル位置に挿入">カーソル位置に挿入</button>
+
+        <!-- 新設: 本当の末尾追加 -->
+        <button type="button" id="btnAppendToEnd" title="末尾へキャレット移動してから追加">末尾に追加</button>
+
+        <label>
+          <input type="checkbox" id="chkSanitizeOnLoad" checked />
+          読み込み/挿入時にSanitizeする
+        </label>
+
+        <div class="spacer"></div>
+
+        <input type="file" id="fileHtml" accept=".html,.htm,.txt" />
+        <button type="button" id="btnFileToBox" title="選択ファイルを入力欄に読み込む">ファイル→入力欄</button>
+      </div>
+      <textarea id="htmlIn" placeholder="ここにHTMLを貼り付けて、上のボタンで読み込み/挿入してください。"></textarea>
+      <p class="hint">Sanitizeは許可タグ/属性に絞り込みます。無加工で読み込みたい場合はチェックを外してください。</p>
+    </div>
+
+    <p class="hint">
+      ショートカット例: <kbd>Ctrl</kbd>+<kbd>B</kbd>（太字） / <kbd>Ctrl</kbd>+<kbd>I</kbd>（斜体） / <kbd>Ctrl</kbd>+<kbd>U</kbd>（下線） / <kbd>Ctrl</kbd>+<kbd>Z</kbd>（Undo）
+    </p>
+  </div>
+
+  <script>
+    const editor = document.getElementById("editor");
+    const htmlOut = document.getElementById("htmlOut");
+    const preview = document.getElementById("preview");
+
+    const blockFormat = document.getElementById("blockFormat");
+    const colorPicker = document.getElementById("colorPicker");
+
+    const htmlIn = document.getElementById("htmlIn");
+    const chkSanitizeOnLoad = document.getElementById("chkSanitizeOnLoad");
+    const fileHtml = document.getElementById("fileHtml");
+
+    let DEBUG = true;
+
+    // Paste mode:
+    // - "sanitize": HTMLを受け取ったらホワイトリストで整形しつつ貼り付け
+    // - "plain": 常にプレーンテキストとして貼り付け
+    let pasteMode = "sanitize"; // "sanitize" | "plain"
+
+    // 追加: 色パレット操作でフォーカスが外れても選択範囲を復元できるように保持
+    let savedRange = null;
+
+    function log(...args) { if (DEBUG) console.log(...args); }
+    function group(label, fn) {
+      if (!DEBUG) return fn();
+      console.group(label);
+      try { return fn(); } finally { console.groupEnd(); }
+    }
+    function now() { return new Date().toISOString(); }
+
+    function safeNodeDesc(n) {
+      if (!n) return "(null)";
+      if (n.nodeType === Node.TEXT_NODE) return `#text("${(n.textContent || "").slice(0, 40)}")`;
+      const tag = (n.tagName || "").toLowerCase();
+      const id = n.id ? `#${n.id}` : "";
+      const cls = n.className ? `.${String(n.className).split(/\s+/).filter(Boolean).join(".")}` : "";
+      return `<${tag}${id}${cls}>`;
+    }
+
+    function selectionSnapshot() {
+      const sel = window.getSelection();
+      if (!sel) return { ok:false, reason:"no selection object" };
+
+      const rangeCount = sel.rangeCount;
+      const text = sel.toString();
+      const anchorNode = sel.anchorNode;
+      const focusNode = sel.focusNode;
+
+      let inEditor = false;
+      let commonAncestor = null;
+
+      if (rangeCount > 0) {
+        const r = sel.getRangeAt(0);
+        commonAncestor = r.commonAncestorContainer;
+        const anc = commonAncestor.nodeType === Node.TEXT_NODE ? commonAncestor.parentNode : commonAncestor;
+        inEditor = !!(anc && editor.contains(anc));
+      }
+
+      return {
+        ok: true,
+        rangeCount,
+        text,
+        anchorNode: safeNodeDesc(anchorNode),
+        focusNode: safeNodeDesc(focusNode),
+        commonAncestor: safeNodeDesc(commonAncestor),
+        inEditor,
+        activeElement: safeNodeDesc(document.activeElement),
+      };
+    }
+
+    function dumpState(reason) {
+      group(`[DUMP] ${reason} @ ${now()}`, () => {
+        console.log("selection:", selectionSnapshot());
+        try {
+          const cmds = ["bold","italic","underline","foreColor","formatBlock","createLink","insertUnorderedList","insertOrderedList","indent","outdent","insertHTML","insertText"];
+          for (const c of cmds) console.log(`queryCommandSupported(${c}):`, document.queryCommandSupported(c));
+          console.log("queryCommandState(bold):", document.queryCommandState("bold"));
+          console.log("queryCommandState(italic):", document.queryCommandState("italic"));
+          console.log("queryCommandState(underline):", document.queryCommandState("underline"));
+          console.log("queryCommandValue(foreColor):", document.queryCommandValue("foreColor"));
+          console.log("queryCommandValue(formatBlock):", document.queryCommandValue("formatBlock"));
+        } catch (e) {
+          console.warn("queryCommand* threw:", e);
+        }
+        console.log("pasteMode:", pasteMode);
+        console.log("sanitizeOnLoad:", chkSanitizeOnLoad.checked);
+        console.log("savedRange:", savedRange ? "yes" : "no");
+        console.log("editor.innerHTML (head 300):", editor.innerHTML.slice(0, 300));
+      });
+    }
+
+    function syncOutputs() {
+      const html = editor.innerHTML;
+      htmlOut.value = html;
+      preview.innerHTML = html;
+      log("[syncOutputs]", { len: html.length });
+    }
+
+    function setPressed(id, pressed) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute("aria-pressed", pressed ? "true" : "false");
+      log("[setPressed]", id, pressed);
+    }
+
+    function getClosestBlockTag() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return null;
+      let node = sel.anchorNode;
+      if (!node) return null;
+      if (node.nodeType === Node.TEXT_NODE) node = node.parentNode;
+
+      while (node && node !== editor) {
+        const t = (node.tagName || "").toLowerCase();
+        if (["h1", "h2", "h3", "p", "li"].includes(t)) return (t === "li" ? "p" : t);
+        node = node.parentNode;
+      }
+      return "p";
+    }
+
+    function syncActiveStates() {
+      group("[syncActiveStates]", () => {
+        try {
+          setPressed("btnBold", document.queryCommandState("bold"));
+          setPressed("btnItalic", document.queryCommandState("italic"));
+          setPressed("btnUnderline", document.queryCommandState("underline"));
+        } catch (e) {
+          console.warn("queryCommandState threw:", e);
+        }
+
+        const tag = getClosestBlockTag();
+        if (tag) blockFormat.value = tag;
+
+        const pm = document.getElementById("btnPasteMode");
+        if (pm) pm.textContent = (pasteMode === "plain") ? "Paste: Plain" : "Paste: Sanitize";
+      });
+    }
+
+    // 追加: 選択範囲の保存/復元（色パレット操作でselectionが消える対策）
+    function saveSelectionRange() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return false;
+
+      const r = sel.getRangeAt(0);
+      const ca = r.commonAncestorContainer;
+      const anc = ca && ca.nodeType === Node.TEXT_NODE ? ca.parentNode : ca;
+      if (!anc || !editor.contains(anc)) return false;
+
+      savedRange = r.cloneRange();
+      return true;
+    }
+
+    function restoreSelectionRange() {
+      if (!savedRange) return false;
+      const sel = window.getSelection();
+      if (!sel) return false;
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+      return true;
+    }
+
+    function exec(cmd, value = null, meta = {}) {
+      return group(`[exec] cmd=${cmd} value=${value} @ ${now()}`, () => {
+        console.log("meta:", meta);
+        console.log("before:", selectionSnapshot());
+
+        // 追加: 要求があれば選択範囲を復元してから実行（主に色パレット連動用）
+        if (meta && meta.restoreSelection) {
+          restoreSelectionRange();
+        }
+
+        editor.focus();
+
+        // focusでselectionが崩れるブラウザ対策（もう一度）
+        if (meta && meta.restoreSelection) {
+          restoreSelectionRange();
+        }
+
+        console.log("after focus:", selectionSnapshot());
+
+        let ok = null;
+        try {
+          ok = document.execCommand(cmd, false, value);
+          console.log("execCommand return:", ok);
+        } catch (e) {
+          console.error("execCommand threw:", e);
+        }
+
+        syncOutputs();
+        syncActiveStates();
+        console.log("after:", selectionSnapshot());
+        return ok;
+      });
+    }
+
+    function insertTextAtCursor(text) {
+      if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
+        const ok = document.execCommand("insertText", false, text);
+        if (ok) return true;
+      }
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return false;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const node = document.createTextNode(text);
+      range.insertNode(node);
+      range.setStartAfter(node);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return true;
+    }
+
+    /* 追加: 末尾へキャレット移動 */
+    function moveCaretToEnd(el) {
+      el.focus();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false); // end
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    function normalizeUrl(u) {
+      if (!u) return "";
+      const s = u.trim();
+      if (!s) return "";
+      if (/^(https?:|mailto:|tel:)/i.test(s)) return s;
+      if (s.startsWith("//")) return "https:" + s;
+      return "https://" + s;
+    }
+
+    function isSafeHref(href) {
+      if (!href) return false;
+      const h = href.trim();
+      if (/^\s*javascript:/i.test(h)) return false;
+      if (/^\s*data:/i.test(h)) return false;
+      if (/^\s*vbscript:/i.test(h)) return false;
+      return /^(https?:|mailto:|tel:)/i.test(h) || h.startsWith("#");
+    }
+
+    function sanitizeColorValue(v) {
+      if (!v) return "";
+      const s = String(v).trim();
+      if (/url\s*\(/i.test(s)) return "";
+      if (/expression\s*\(/i.test(s)) return "";
+      if (/var\s*\(/i.test(s)) return "";
+      return s;
+    }
+
+    function sanitizeHTML(html) {
+      const ALLOW = new Set(["p","br","strong","b","em","i","u","span","a","ul","ol","li","h1","h2","h3"]);
+      const template = document.createElement("template");
+      template.innerHTML = html;
+
+      function cleanNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) return;
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const tag = node.tagName.toLowerCase();
+
+          if (["script","style","iframe","object","embed","link","meta"].includes(tag)) {
+            node.remove();
+            return;
+          }
+
+          if (!ALLOW.has(tag)) {
+            const parent = node.parentNode;
+            if (!parent) { node.remove(); return; }
+            while (node.firstChild) parent.insertBefore(node.firstChild, node);
+            node.remove();
+            return;
+          }
+
+          const attrs = Array.from(node.attributes || []);
+          for (const a of attrs) {
+            const name = a.name.toLowerCase();
+            const val = a.value;
+
+            if (name.startsWith("on")) {
+              node.removeAttribute(a.name);
+              continue;
+            }
+
+            if (tag === "a") {
+              if (name !== "href") {
+                node.removeAttribute(a.name);
+              } else {
+                const href = normalizeUrl(val);
+                if (!isSafeHref(href)) node.removeAttribute("href");
+                else node.setAttribute("href", href);
+              }
+              continue;
+            }
+
+            if (tag === "span") {
+              if (name === "style") {
+                const style = node.getAttribute("style") || "";
+                let color = "";
+                const parts = style.split(";").map(x => x.trim()).filter(Boolean);
+                for (const p of parts) {
+                  const m = p.match(/^color\s*:\s*(.+)$/i);
+                  if (m) color = m[1].trim();
+                }
+                const safe = sanitizeColorValue(color);
+                if (safe) node.setAttribute("style", `color: ${safe};`);
+                else node.removeAttribute("style");
+              } else {
+                node.removeAttribute(a.name);
+              }
+              continue;
+            }
+
+            node.removeAttribute(a.name);
+          }
+
+          if (tag === "b") {
+            const strong = document.createElement("strong");
+            while (node.firstChild) strong.appendChild(node.firstChild);
+            node.replaceWith(strong);
+            node = strong;
+          }
+          if (tag === "i") {
+            const em = document.createElement("em");
+            while (node.firstChild) em.appendChild(node.firstChild);
+            node.replaceWith(em);
+            node = em;
+          }
+        }
+
+        const children = Array.from(node.childNodes || []);
+        for (const c of children) cleanNode(c);
+      }
+
+      const kids = Array.from(template.content.childNodes);
+      for (const k of kids) cleanNode(k);
+
+      return template.innerHTML;
+    }
+
+    // Paste
+    editor.addEventListener("paste", (e) => {
+      group(`[paste] mode=${pasteMode} @ ${now()}`, () => {
+        const cd = e.clipboardData;
+        if (!cd) return;
+
+        const text = cd.getData("text/plain") || "";
+        const html = cd.getData("text/html") || "";
+
+        e.preventDefault();
+        editor.focus();
+
+        if (pasteMode === "plain") {
+          insertTextAtCursor(text);
+          syncOutputs(); syncActiveStates();
+          return;
+        }
+
+        if (html) {
+          const clean = sanitizeHTML(html);
+          exec("insertHTML", clean, { from: "paste(sanitize)" });
+        } else {
+          insertTextAtCursor(text);
+          syncOutputs(); syncActiveStates();
+        }
+      });
+    });
+
+    // Toolbar
+    blockFormat.addEventListener("change", (e) => {
+      const v = String(e.target.value).toLowerCase();
+      const arg = v.startsWith("<") ? v : `<${v}>`;
+      exec("formatBlock", arg, { from: "blockFormat" });
+    });
+
+    document.getElementById("btnBold").addEventListener("click", () => exec("bold", null, { from: "btnBold" }));
+    document.getElementById("btnItalic").addEventListener("click", () => exec("italic", null, { from: "btnItalic" }));
+    document.getElementById("btnUnderline").addEventListener("click", () => exec("underline", null, { from: "btnUnderline" }));
+
+    // 従来どおり: 「色適用」ボタンは残す
+    document.getElementById("btnApplyColor").addEventListener("click", () =>
+      exec("foreColor", colorPicker.value, { from: "btnApplyColor", restoreSelection: true })
+    );
+
+    // 追加: 色パレット変更をトリガーに、（エディタ内の）選択テキストへ即時適用
+    // - color input は操作中にフォーカスが移り selection が消える場合があるため、事前に保存→復元して適用
+    function applyColorFromPickerTrigger(from) {
+      // 直前にエディタ内で選択が保存されている場合のみ、自動適用する
+      if (!savedRange) return;
+      exec("foreColor", colorPicker.value, { from, auto: true, restoreSelection: true });
+    }
+
+    // 色パレットを開く前/フォーカス時点で選択を保存
+    colorPicker.addEventListener("pointerdown", () => { saveSelectionRange(); });
+    colorPicker.addEventListener("focus", () => { saveSelectionRange(); });
+
+    // 変更確定（ダイアログを閉じた時点）で適用
+    colorPicker.addEventListener("change", () => { applyColorFromPickerTrigger("colorPicker(change)"); });
+
+    document.getElementById("btnLink").addEventListener("click", () => {
+      const sel = selectionSnapshot();
+      if (!sel.ok || sel.rangeCount === 0 || !sel.inEditor) {
+        alert("エディタ内のテキストを選択してからリンクを設定してください。");
+        return;
+      }
+      const url = normalizeUrl(prompt("リンクURLを入力してください（例: https://example.com）", "https://"));
+      if (!url) return;
+      if (!isSafeHref(url)) { alert("無効なURLです。"); return; }
+      exec("createLink", url, { from: "btnLink" });
+    });
+    document.getElementById("btnUnlink").addEventListener("click", () => exec("unlink", null, { from: "btnUnlink" }));
+
+    document.getElementById("btnUL").addEventListener("click", () => exec("insertUnorderedList", null, { from: "btnUL" }));
+    document.getElementById("btnOL").addEventListener("click", () => exec("insertOrderedList", null, { from: "btnOL" }));
+    document.getElementById("btnIndent").addEventListener("click", () => exec("indent", null, { from: "btnIndent" }));
+    document.getElementById("btnOutdent").addEventListener("click", () => exec("outdent", null, { from: "btnOutdent" }));
+
+    document.getElementById("btnUndo").addEventListener("click", () => exec("undo", null, { from: "btnUndo" }));
+    document.getElementById("btnRedo").addEventListener("click", () => exec("redo", null, { from: "btnRedo" }));
+
+    document.getElementById("btnClearFormat").addEventListener("click", () => {
+      exec("removeFormat", null, { from: "btnClearFormat", step: "removeFormat" });
+      exec("formatBlock", "<p>", { from: "btnClearFormat", step: "formatBlock<p>" });
+    });
+    document.getElementById("btnClearAll").addEventListener("click", () => {
+      if (!confirm("本文をすべて消去します。よろしいですか？")) return;
+      editor.innerHTML = "<p><br></p>";
+      editor.focus();
+      syncOutputs();
+      syncActiveStates();
+    });
+
+    document.getElementById("btnCopyHtml").addEventListener("click", async () => {
+      syncOutputs();
+      try {
+        await navigator.clipboard.writeText(htmlOut.value);
+        alert("HTMLをクリップボードにコピーしました。");
+      } catch (e) {
+        htmlOut.focus();
+        htmlOut.select();
+        try {
+          document.execCommand("copy");
+          alert("HTMLをコピーしました（フォールバック）。");
+        } catch (e2) {
+          alert("コピーに失敗しました。Consoleを確認してください。");
+        } finally {
+          editor.focus();
+        }
+      }
+    });
+
+    document.getElementById("btnDump").addEventListener("click", () => dumpState("manual dump"));
+    document.getElementById("btnToggleDebug").addEventListener("click", (e) => {
+      DEBUG = !DEBUG;
+      e.target.textContent = `Debug: ${DEBUG ? "ON" : "OFF"}`;
+      console.log(`[debug] DEBUG=${DEBUG}`);
+    });
+
+    document.getElementById("btnPasteMode").addEventListener("click", () => {
+      pasteMode = (pasteMode === "sanitize") ? "plain" : "sanitize";
+      syncActiveStates();
+    });
+
+    // Load / Insert
+    function getLoadPayload() {
+      const raw = htmlIn.value || "";
+      return chkSanitizeOnLoad.checked ? sanitizeHTML(raw) : raw;
+    }
+
+    document.getElementById("btnLoadHtml").addEventListener("click", () => {
+      const payload = getLoadPayload();
+      editor.innerHTML = payload || "<p><br></p>";
+      editor.focus();
+      syncOutputs();
+      syncActiveStates();
+      saveSelectionRange();
+      dumpState("after load html");
+    });
+
+    // 旧「末尾に追加」相当：カーソル位置に挿入
+    document.getElementById("btnInsertAtCursor").addEventListener("click", () => {
+      const payload = getLoadPayload();
+      editor.focus();
+      exec("insertHTML", payload, { from: "insertAtCursor", sanitize: chkSanitizeOnLoad.checked });
+      saveSelectionRange();
+    });
+
+    // 新設：本当の末尾追加（末尾へキャレット移動→insertHTML）
+    document.getElementById("btnAppendToEnd").addEventListener("click", () => {
+      const payload = getLoadPayload();
+      moveCaretToEnd(editor);
+      exec("insertHTML", payload, { from: "appendToEnd", sanitize: chkSanitizeOnLoad.checked });
+      saveSelectionRange();
+    });
+
+    document.getElementById("btnFileToBox").addEventListener("click", () => {
+      const f = fileHtml.files && fileHtml.files[0];
+      if (!f) { alert("ファイルを選択してください。"); return; }
+      const reader = new FileReader();
+      reader.onload = () => { htmlIn.value = String(reader.result || ""); };
+      reader.onerror = () => alert("ファイル読み込みに失敗しました。");
+      reader.readAsText(f);
+    });
+
+    // Editor events
+    editor.addEventListener("input", () => { syncOutputs(); syncActiveStates(); saveSelectionRange(); });
+    editor.addEventListener("keyup", () => { syncActiveStates(); saveSelectionRange(); });
+    editor.addEventListener("mouseup", () => { syncActiveStates(); saveSelectionRange(); });
+    editor.addEventListener("focus", () => { syncActiveStates(); saveSelectionRange(); });
+
+    // init
+    console.log("[init] userAgent:", navigator.userAgent);
+    dumpState("init");
+    syncOutputs();
+    syncActiveStates();
+    saveSelectionRange();
+  </script>
+</body>
+</html>
