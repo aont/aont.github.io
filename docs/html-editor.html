@@ -83,6 +83,14 @@
     </div>
 
     <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+      <label id="langLabel" title="UI言語">
+        <span id="langLabelText">言語:</span>
+        <select id="langSelect">
+          <option id="langOptionJa" value="ja">日本語</option>
+          <option id="langOptionEn" value="en">English</option>
+        </select>
+      </label>
+
       <select id="blockFormat" title="見出し/段落">
         <option id="optParagraph" value="p">段落 (P)</option>
         <option id="optH1" value="h1">H1</option>
@@ -200,6 +208,7 @@
         copyHtml: { label: "HTMLコピー", title: "HTMLをコピー" },
         dump: { label: "Dump", title: "Selection/状態をダンプ" },
         toggleDebug: { labelOn: "Debug: ON", labelOff: "Debug: OFF", title: "debugログをON/OFF" },
+        language: { title: "UI言語", text: "言語:", ja: "日本語", en: "英語" },
         editorIntro: "<h2>ここを編集できます</h2><p>テキストを選択して、上のツールバーで <strong>太字</strong>、<em>斜体</em>、<u>下線</u>、<span style=\"color:#0969da;\">色</span> を適用してください。</p><p>読み込み欄から HTML を「読み込み」「カーソル位置に挿入」「末尾に追加」できます。</p>",
         panelOutput: "HTML出力（editor.innerHTML）",
         panelPreview: "プレビュー（そのまま表示）",
@@ -253,6 +262,7 @@
         copyHtml: { label: "Copy HTML", title: "Copy HTML" },
         dump: { label: "Dump", title: "Dump selection/state" },
         toggleDebug: { labelOn: "Debug: ON", labelOff: "Debug: OFF", title: "Toggle debug log" },
+        language: { title: "Language", text: "Language:", ja: "Japanese", en: "English" },
         editorIntro: "<h2>You can edit here</h2><p>Select text and use the toolbar above to apply <strong>bold</strong>, <em>italic</em>, <u>underline</u>, and <span style=\"color:#0969da;\">color</span>.</p><p>Use the load box to \"Load\", \"Insert at cursor\", or \"Append to end\" HTML.</p>",
         panelOutput: "HTML output (editor.innerHTML)",
         panelPreview: "Preview (rendered as-is)",
@@ -328,6 +338,11 @@
     const btnInsertAtCursor = document.getElementById("btnInsertAtCursor");
     const btnAppendToEnd = document.getElementById("btnAppendToEnd");
     const btnFileToBox = document.getElementById("btnFileToBox");
+    const langLabel = document.getElementById("langLabel");
+    const langLabelText = document.getElementById("langLabelText");
+    const langSelect = document.getElementById("langSelect");
+    const langOptionJa = document.getElementById("langOptionJa");
+    const langOptionEn = document.getElementById("langOptionEn");
 
     let DEBUG = true;
     const defaultLang = (navigator.language && navigator.language.startsWith("ja")) ? "ja" : "en";
@@ -372,6 +387,12 @@
       btnDump.textContent = i18n.dump.label; btnDump.title = i18n.dump.title;
       btnToggleDebug.textContent = i18n.toggleDebug.labelOn; btnToggleDebug.title = i18n.toggleDebug.title;
 
+      langLabel.title = i18n.language.title;
+      langLabelText.textContent = i18n.language.text;
+      langOptionJa.textContent = i18n.language.ja;
+      langOptionEn.textContent = i18n.language.en;
+      langSelect.value = langKey;
+
       htmlIntro.innerHTML = i18n.editorIntro;
       panelOutputTitle.textContent = i18n.panelOutput;
       panelPreviewTitle.textContent = i18n.panelPreview;
@@ -393,6 +414,11 @@
     let pasteMode = "sanitize"; // "sanitize" | "plain"
 
     applyLanguage(defaultLang);
+
+    langSelect.addEventListener("change", (e) => {
+      const chosen = e.target.value;
+      applyLanguage(chosen);
+    });
 
     function log(...args) { if (DEBUG) console.log(...args); }
     function group(label, fn) {
