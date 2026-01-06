@@ -59,7 +59,7 @@ window.addEventListener("load", function () {
                 link.textContent = displayText;
                 w.document.body.appendChild(link);
             }
-            resolve(null);
+            resolve(w);
             return false;
 
         }, { once: true });
