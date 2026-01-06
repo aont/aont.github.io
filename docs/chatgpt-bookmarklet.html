@@ -36,7 +36,7 @@
     function convert() {
       const input = document.getElementById("inputText").value;
       const jsCode = "!async function(){const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));const promptTextarea=document.querySelector(\"#prompt-textarea\");const childNodesSaved=Array.from(promptTextarea.childNodes);const promptInputList=" + JSON.stringify(input.split(/\r?\n/)) + ";for(const promptLine of promptInputList){const p=document.createElement(\"p\");if(\"\"==promptLine){const br=document.createElement(\"br\");p.appendChild(br)}else p.textContent=promptLine;promptTextarea.appendChild(p)}for(const childNodeSaved of childNodesSaved){promptTextarea.removeChild(childNodeSaved);promptTextarea.appendChild(childNodeSaved);}await sleep(0);promptTextarea.lastChild.scrollIntoView();}();";
-      const bookmarkletUrl = "javascript:" + jsCode.replaceAll("%", "%25");
+      const bookmarkletUrl = "javascript:" + jsCode.replaceAll("%", "%25").replaceAll("\"", "%22");
       document.getElementById("outputText").value = bookmarkletUrl;
       
       const outputAnchor = document.getElementById("outputAnchor");
