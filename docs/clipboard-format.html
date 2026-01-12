@@ -177,11 +177,20 @@
 
   $ua.textContent = isMobile() ? 'Mobile' : 'Desktop';
 
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function toHtml(text){
     // Keeps the original behavior: empty lines become <br>
     return text.split(/\r?\n/).reduce((a, c) => {
       if (c === "") c = "<br>";
-      return a + "<div>" + c + "</div>";
+      return a + "<div class=\"font-family: sans-serif\">" + escapeHtml(c) + "</div>";
     }, "");
   }
 
