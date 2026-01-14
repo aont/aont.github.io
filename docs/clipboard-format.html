@@ -189,8 +189,9 @@
   function toHtml(text){
     // Keeps the original behavior: empty lines become <br>
     return text.split(/\r?\n/).reduce((a, c) => {
+      c = escapeHtml(c);
       if (c === "") c = "<br>";
-      return a + "<div class=\"font-family: sans-serif\">" + escapeHtml(c) + "</div>";
+      return a + "<div class=\"font-family: sans-serif\">" + c + "</div>";
     }, "");
   }
 
