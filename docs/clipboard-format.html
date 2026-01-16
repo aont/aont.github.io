@@ -1,21 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Clipboard Processor</title>
   <style>
     :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --warn:#ca8a04;
+      --err:#dc2626;
+
+      --radius:14px;
+
+      --shadow: 0 8px 24px rgba(0,0,0,.10);
+      --border: rgba(17,24,39,.14);
+
+      --pill-bg: rgba(17,24,39,.06);
+      --log-bg: rgba(17,24,39,.04);
+
+      --control-bg: rgba(17,24,39,.03);
+      --control-border: rgba(17,24,39,.14);
+      --option-bg: #ffffff;
+      --option-text: #111827;
+      --focus: rgba(37,99,235,.20);
+    }
+
+    html[data-theme="dark"]{
       --bg:#0b0f19;
       --card:#121a2a;
       --text:#e8eefc;
       --muted:#a9b5d1;
+
       --accent:#4f8cff;
       --ok:#2ecc71;
       --warn:#f1c40f;
       --err:#e74c3c;
-      --radius:14px;
+
+      --shadow: 0 8px 24px rgba(0,0,0,.25);
+      --border: rgba(255,255,255,.14);
+
+      --pill-bg: rgba(255,255,255,.08);
+      --log-bg: rgba(255,255,255,.04);
+
+      --control-bg: rgba(255,255,255,.04);
+      --control-border: rgba(255,255,255,.14);
+      --option-bg: #0b0f19;
+      --option-text: #e8eefc;
+      --focus: rgba(79,140,255,.25);
     }
+
     *{ box-sizing:border-box; }
     body{
       margin:0;
@@ -34,7 +73,7 @@
       background: var(--card);
       border-radius: var(--radius);
       padding: 14px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      box-shadow: var(--shadow);
     }
     h1{
       font-size: 18px;
@@ -76,8 +115,9 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      background: rgba(255,255,255,.08);
+      background: var(--pill-bg);
       color: var(--muted);
+      border: 1px solid transparent;
     }
     .pill.ok{ color: var(--ok); }
     .pill.warn{ color: var(--warn); }
@@ -88,7 +128,7 @@
       font-size: 12px;
       line-height: 1.45;
       color: var(--text);
-      background: rgba(255,255,255,.04);
+      background: var(--log-bg);
       border-radius: 12px;
       padding: 10px;
       max-height: 45vh;
@@ -96,6 +136,7 @@
       -webkit-overflow-scrolling: touch;
       white-space: pre-wrap;
       word-break: break-word;
+      border: 1px solid transparent;
     }
     .row{
       display:flex;
@@ -108,12 +149,60 @@
       width: 100%;
       padding: 12px 14px;
       border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.14);
+      border: 1px solid var(--border);
       background: transparent;
       color: var(--text);
       font-weight: 650;
       font-size: 14px;
     }
+    .secondary:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .controls{
+      display:grid;
+      gap:10px;
+    }
+    .control{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    label{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    select{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--control-border);
+      background: var(--control-bg);
+      color: var(--text);
+      font-weight: 650;
+      font-size: 14px;
+      outline: none;
+      appearance: none;
+    }
+    select:focus-visible{
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    select option{
+      background: var(--option-bg);
+      color: var(--option-text);
+    }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 0;
+    }
+    code{ color: color-mix(in srgb, var(--accent) 30%, var(--text)); }
   </style>
 </head>
 <body>
@@ -127,7 +216,46 @@
       </p>
     </div>
 
+    <!-- Preset selection UI (Themeはここから外した) -->
+    <div class="card controls">
+      <div class="control">
+        <div style="min-width: 120px;">
+          <label for="preset">HTML preset</label>
+          <div class="pill" id="presetBadge" style="display:inline-block;margin-top:6px;">default</div>
+        </div>
+        <div style="flex:1; min-width: 220px;">
+          <select id="preset" aria-label="HTML preset">
+            <!-- <option value="default" selected>Default</option> -->
+            <option value="sansDiv" selected>DIV + sans-serif</option>
+            <option value="olk">OLK Style</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">
+        The selected preset changes how <code>toHtml()</code> converts line breaks. This is applied when you press the process button.
+      </p>
+    </div>
+
     <button id="process" type="button">Format and overwrite clipboard</button>
+
+    <!-- Theme UI をボタンより下に移動 -->
+    <div class="card controls">
+      <div class="control">
+        <div style="min-width: 120px;">
+          <label for="theme">Theme</label>
+          <div class="pill" id="themeBadge" style="display:inline-block;margin-top:6px;">light</div>
+        </div>
+        <div style="flex:1; min-width: 220px;">
+          <select id="theme" aria-label="Theme">
+            <option value="light" selected>Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">
+        Theme changes the UI only (does not affect clipboard formatting).
+      </p>
+    </div>
 
     <div class="card status">
       <div class="row" style="width:100%">
@@ -153,6 +281,12 @@
   const $len = document.getElementById('len');
   const $ua = document.getElementById('ua');
 
+  const $preset = document.getElementById('preset');
+  const $presetBadge = document.getElementById('presetBadge');
+
+  const $theme = document.getElementById('theme');
+  const $themeBadge = document.getElementById('themeBadge');
+
   function nowStamp(){
     const d = new Date();
     const pad = (n)=>String(n).padStart(2,'0');
@@ -174,7 +308,6 @@
   function isMobile(){
     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   }
-
   $ua.textContent = isMobile() ? 'Mobile' : 'Desktop';
 
   function escapeHtml(str) {
@@ -186,14 +319,64 @@
       .replace(/'/g, "&#39;");
   }
 
-  function toHtml(text){
-    // Keeps the original behavior: empty lines become <br>
-    return text.split(/\r?\n/).reduce((a, c) => {
-      c = escapeHtml(c);
-      if (c === "") c = "<br>";
-      return a + "<div class=\"font-family: sans-serif\">" + c + "</div>";
-    }, "");
+  const PRESETS = {
+    sansDiv: {
+      name: "DIV + sans-serif",
+      convertLine: (lineEscaped) => {
+        let c = lineEscaped;
+        if (c === "") c = "<br>";
+        return "<div style=\"font-family: sans-serif\">" + c + "</div>";
+      },
+      joiner: ""
+    },
+    olk: {
+      name: "olk",
+      convertLine: (lineEscaped) => {
+        const c = (lineEscaped === "") ? "&nbsp;" : lineEscaped;
+        return "<div dir=\"ltr\" data-olk-copy-source=\"MessageBody\" style=\"border: 0px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-variant-alternates: inherit; font-variant-position: inherit; font-variant-emoji: inherit; font-weight: 400; font-stretch: inherit; font-size: 12pt; line-height: inherit; font-family: &quot;Yu Gothic&quot;, 游ゴシック, YuGothic, sans-serif, serif, EmojiFont; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; margin: 0px; padding: 0px; vertical-align: baseline; color: black; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;\">" + c +"</div>";
+      },
+      joiner: ""
+    }
+  };
+  PRESETS["default"] = PRESETS["sansDiv"];
+
+  function toHtml(text, presetKey){
+    const key = PRESETS[presetKey] ? presetKey : "default";
+    const preset = PRESETS[key];
+
+    const lines = text.split(/\r?\n/);
+    const linesEscaped = lines.map(escapeHtml);
+
+    if (preset.convertAll){
+      return preset.convertAll(linesEscaped);
+    }
+    return linesEscaped.reduce((a, c) => a + preset.convertLine(c), "");
   }
+
+  function updatePresetBadge(){
+    const key = PRESETS[$preset.value] ? $preset.value : "default";
+    $presetBadge.textContent = key;
+  }
+
+  function setTheme(theme){
+    const t = (theme === "dark") ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+    $theme.value = t;
+    $themeBadge.textContent = t;
+  }
+
+  $preset.addEventListener('change', () => {
+    updatePresetBadge();
+    appendLog(`Preset changed: ${$preset.value} (${PRESETS[$preset.value]?.name || "unknown"})`);
+  });
+
+  $theme.addEventListener('change', () => {
+    setTheme($theme.value);
+    appendLog(`Theme changed: ${$theme.value}`);
+  });
+
+  updatePresetBadge();
+  setTheme("light"); // white background default
 
   async function processClipboard(){
     $process.disabled = true;
@@ -204,33 +387,33 @@
         throw new Error('Clipboard API is not available. Make sure you are running over HTTPS and that your browser supports it.');
       }
 
-      // On mobile, readText() often requires a direct user gesture (tap)
       const text = await navigator.clipboard.readText();
 
       if(!text){
         setStatus('Clipboard is empty', 'warn');
-        appendLog('⚠ No text found in the clipboard');
+        appendLog('No text found in the clipboard');
         $len.textContent = 'Chars: 0';
         return;
       }
 
       $len.textContent = `Chars: ${text.length}`;
-      appendLog(`📥 Input detected (${text.length} characters)`);
+      appendLog(`Input detected (${text.length} characters)`);
 
-      const htmlText = toHtml(text);
+      const presetKey = $preset.value;
+      const htmlText = toHtml(text, presetKey);
+      appendLog(`HTML generated with preset: ${presetKey}`);
 
-      // write() / ClipboardItem may be unsupported or restricted on some mobile browsers
       await navigator.clipboard.write([new ClipboardItem({
         "text/plain": new Blob([text], {type:"text/plain"}),
         "text/html" : new Blob([htmlText], {type:"text/html"})
       })]);
 
       setStatus('Done', 'ok');
-      appendLog('📤 Clipboard write completed (text/plain + text/html)');
+      appendLog('Clipboard write completed (text/plain + text/html)');
 
     }catch(e){
       setStatus('Failed', 'err');
-      appendLog(`💥 Error: ${e && e.message ? e.message : String(e)}`);
+      appendLog(`Error: ${e && e.message ? e.message : String(e)}`);
       appendLog('Hint: Some browsers (notably iOS Safari) may restrict writing HTML to the clipboard. Try Android Chrome or a desktop browser if needed.');
     }finally{
       $process.disabled = false;
