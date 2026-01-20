@@ -1,98 +1,360 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Blank page</title>
-<style>
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; max-width: 720px; margin: 0 auto; }
-textarea { width: 100%; box-sizing: border-box; padding: 12px; font-size: 14px; }
-.row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
-button { padding: 10px 14px; font-size: 14px; cursor: pointer; }
-.output { margin-top: 16px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; word-break: break-all; }
-</style>
-<script>
-window.addEventListener("load", function () {
-    // 1) Prefer the `message` query string if present
-    const params = new URLSearchParams(window.location.search);
-    const messageFromQuery = params.get("message"); // can be null
-
-    // 2) Fallback: detect browser name (legacy behavior)
-    let browserName;
-    if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
-        const brandSpecific = navigator.userAgentData.brands.find(function (brand) {
-            return brand && (brand.brand === "Google Chrome" || brand.brand === "Microsoft Edge");
-        });
-        browserName = brandSpecific
-            ? (brandSpecific.brand + " " + brandSpecific.version)
-            : navigator.userAgentData.brands.map(function (brand) {
-                return brand.brand + " " + brand.version;
-            }).join(", ");
-    } else {
-        browserName = navigator.userAgent;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Message Link Generator</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --border: rgba(15, 23, 42, .14);
+      --border2: rgba(15, 23, 42, .10);
+      --text: rgba(15, 23, 42, .92);
+      --muted: rgba(15, 23, 42, .66);
+      --muted2: rgba(15, 23, 42, .56);
+      --accent: #4f46e5;   /* indigo */
+      --accent2: #06b6d4;  /* cyan */
+      --shadow: 0 14px 40px rgba(15, 23, 42, .10);
+      --radius: 16px;
+      --radius2: 12px;
     }
 
-    // 3) Decide the text to display
-    // If `message` is an empty string or only whitespace, fall back to browserName
-    const displayText = (messageFromQuery && messageFromQuery.trim().length > 0)
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      padding: 28px 18px;
+    }
+
+    .wrap{
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    header{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .title{
+      display: grid;
+      gap: 6px;
+    }
+
+    h1{
+      font-size: 22px;
+      line-height: 1.2;
+      margin: 0;
+      letter-spacing: .2px;
+    }
+
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .chip{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--border2);
+      border-radius: 999px;
+      background: rgba(15,23,42,.02);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .chip-dot{
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+    }
+
+    .card{
+      background: var(--panel);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-body{
+      padding: 18px;
+    }
+
+    .field{
+      display: grid;
+      gap: 8px;
+    }
+
+    label{
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .2px;
+    }
+
+    textarea{
+      width: 100%;
+      min-height: 144px;
+      resize: vertical;
+      padding: 12px 12px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+      line-height: 1.55;
+      box-shadow: inset 0 1px 0 rgba(15,23,42,.04);
+    }
+
+    textarea::placeholder{ color: rgba(15,23,42,.35); }
+
+    textarea:focus{
+      border-color: rgba(79,70,229,.55);
+      box-shadow:
+        0 0 0 4px rgba(79,70,229,.14),
+        inset 0 1px 0 rgba(15,23,42,.04);
+    }
+
+    .actions{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .2px;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      user-select: none;
+    }
+
+    button:hover{
+      background: rgba(15,23,42,.03);
+      border-color: rgba(15,23,42,.18);
+    }
+
+    button:active{ transform: translateY(1px); }
+
+    .btn-primary{
+      border: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 10px 24px rgba(79,70,229,.18);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover{
+      filter: brightness(1.01);
+      box-shadow: 0 12px 28px rgba(79,70,229,.22);
+    }
+
+    .output{
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border2);
+      background: rgba(15,23,42,.02);
+      display: grid;
+      gap: 10px;
+    }
+
+    .output-title{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .link-row{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    a{
+      color: rgba(15,23,42,.92);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    a:hover{ text-decoration: underline; }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: rgba(15,23,42,.82);
+      word-break: break-all;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border2);
+      background: #ffffff;
+    }
+
+    .hint{
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted2);
+    }
+
+    /* Popup hint banner */
+    .banner{
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 158, 11, .35); /* amber */
+      background: rgba(245, 158, 11, .10);
+      color: rgba(15,23,42,.90);
+      line-height: 1.5;
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      inset: auto 16px 16px auto;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border2);
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 50px rgba(15, 23, 42, .12);
+      color: rgba(15,23,42,.92);
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show{ display: inline-flex; }
+
+    .toast-badge{
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      * { transition: none !important; }
+    }
+  </style>
+
+  <script>
+    window.addEventListener("load", function () {
+      // 1) Prefer the `message` query string if present
+      const params = new URLSearchParams(window.location.search);
+      const messageFromQuery = params.get("message"); // can be null
+
+      // 2) Fallback: detect browser name (legacy behavior)
+      let browserName;
+      if (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) {
+        const brandSpecific = navigator.userAgentData.brands.find(function (brand) {
+          return brand && (brand.brand === "Google Chrome" || brand.brand === "Microsoft Edge");
+        });
+        browserName = brandSpecific
+          ? (brandSpecific.brand + " " + brandSpecific.version)
+          : navigator.userAgentData.brands.map(function (brand) {
+              return brand.brand + " " + brand.version;
+            }).join(", ");
+      } else {
+        browserName = navigator.userAgent;
+      }
+
+      // 3) Decide the text to display
+      // If `message` is an empty string or only whitespace, fall back to browserName
+      const displayText = (messageFromQuery && messageFromQuery.trim().length > 0)
         ? messageFromQuery
         : browserName;
 
-    // 4) Click -> open popup -> show text -> go back (preserve original flow)
-    const a = document.createElement("a");
+      // 4) Click -> open popup -> show text -> go back (preserve original flow)
+      const a = document.createElement("a");
 
-    const clickPromise = new Promise(function(resolve) {
+      const clickPromise = new Promise(function(resolve) {
         a.addEventListener("click", function () {
-            const s = window.screen;
-            const w = window.open(
-                "about:blank",
-                "_blank",
-                "popup,location=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,width=300,height=100,left=" +
-                    s.availWidth.toString() + ",top=" + s.availHeight.toString()
-            );
-            if (w) {
-                // Avoid XSS: build elements and set textContent
-                const link = w.document.createElement("a");
-                link.href = "about:blank";
-                link.target = "_blank";
-                link.textContent = displayText;
-                w.document.body.appendChild(link);
-            }
-            resolve(w);
-            return false;
+          const s = window.screen;
+          const w = window.open(
+            "about:blank",
+            "_blank",
+            "popup,location=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,width=300,height=100,left=" +
+              s.availWidth.toString() + ",top=" + s.availHeight.toString()
+          );
+          if (w) {
+            // Avoid XSS: build elements and set textContent
+            const link = w.document.createElement("a");
+            link.href = "about:blank";
+            link.target = "_blank";
+            link.textContent = displayText;
 
+            // Basic popup layout
+            w.document.body.style.margin = "0";
+            w.document.body.style.display = "grid";
+            w.document.body.style.placeItems = "center";
+            w.document.body.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+            w.document.body.appendChild(link);
+          }
+          resolve(w);
+          return false;
         }, { once: true });
-    });
+      });
 
-    document.body.appendChild(a);
+      document.body.appendChild(a);
 
-    // Trigger click programmatically
-    a.click();
+      // Trigger click programmatically
+      a.click();
 
-    // After popup, remove the prompt link and navigate back
-    clickPromise.then(function (w) {
+      // After popup, remove the prompt link and show hint if blocked
+      clickPromise.then(function (w) {
         if (w) {
-            document.body.removeChild(a);
-            a.remove();
+          document.body.removeChild(a);
+          a.remove();
         } else {
-            document.getElementById("popup-hint").style.display = "block";
+          document.getElementById("popup-hint").style.display = "block";
         }
-    });
+      });
 
+      const $msg = document.getElementById("msg");
+      const $out = document.getElementById("out");
+      const $link = document.getElementById("link");
+      const $url  = document.getElementById("url");
+      const $gen  = document.getElementById("gen");
+      const $copy = document.getElementById("copy");
+      const $toast = document.getElementById("toast");
 
-    const $msg = document.getElementById("msg");
-    const $out = document.getElementById("out");
-    const $link = document.getElementById("link");
-    const $url  = document.getElementById("url");
-    const $gen  = document.getElementById("gen");
-    const $copy = document.getElementById("copy");
-
-    function buildUrl(text) {
+      function buildUrl(text) {
         return location.protocol + "//" + location.host + location.pathname + "?message=" + encodeURIComponent(text);
-    }
+      }
 
-    function render() {
+      function showToast(text){
+        $toast.querySelector(".toast-text").textContent = text;
+        $toast.classList.add("show");
+        window.clearTimeout(showToast._t);
+        showToast._t = window.setTimeout(() => $toast.classList.remove("show"), 1400);
+      }
+
+      function render() {
         const text = $msg.value ?? "";
         const generated = buildUrl(text);
 
@@ -100,47 +362,80 @@ window.addEventListener("load", function () {
         $url.textContent = generated;
 
         $out.hidden = false;
-    }
+        showToast("Link generated");
+      }
 
-    $gen.addEventListener("click", render);
+      $gen.addEventListener("click", render);
 
-    $copy.addEventListener("click", async () => {
+      $copy.addEventListener("click", async () => {
         const text = $msg.value ?? "";
         const generated = buildUrl(text);
         try {
-            await navigator.clipboard.writeText(generated);
-            // Simple feedback
-            $copy.textContent = "Copied";
-            setTimeout(() => ($copy.textContent = "Copy URL"), 1200);
+          await navigator.clipboard.writeText(generated);
+          $copy.textContent = "Copied";
+          showToast("URL copied");
+          setTimeout(() => ($copy.textContent = "Copy URL"), 1200);
         } catch (e) {
-            // Fallback if clipboard API isn't available
-            prompt("Copy this URL:", generated);
+          // Fallback if clipboard API isn't available
+          prompt("Copy this URL:", generated);
         }
+      });
+
+      // If you want live updates as the user types, enable this:
+      // $msg.addEventListener("input", render);
     });
-
-    // If you want live updates as the user types, enable this:
-    // $msg.addEventListener("input", render);
-});
-</script>
+  </script>
 </head>
+
 <body>
-<div style="display: none;" id="popup-hint">If the window does not appear, please allow pop-ups for this window.</div>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Message Link Generator</h1>
+        <p class="subtitle">
+          Generate a shareable URL with a query string from your message. When opened, the message is shown in a pop-up.
+        </p>
+      </div>
+      <div class="chip" aria-label="status">
+        <span class="chip-dot" aria-hidden="true"></span>
+        Ready
+      </div>
+    </header>
 
-<label for="msg">Message</label><br />
-<textarea id="msg" rows="6" placeholder="Type your message here..."></textarea>
+    <div class="banner" id="popup-hint">
+      If the pop-up window does not appear, please allow pop-ups for this page.
+    </div>
 
-<div class="row">
-<button id="gen" type="button">Generate Link</button>
-<button id="copy" type="button">Copy URL</button>
-</div>
+    <section class="card" aria-label="generator">
+      <div class="card-body">
+        <div class="field">
+          <label for="msg">Message</label>
+          <textarea id="msg" rows="6" placeholder="Type your message here..."></textarea>
+        </div>
 
-<div class="output" id="out" hidden>
-<div>Generated link:</div>
-<div style="margin-top: 8px;">
-<a id="link" href="#" rel="noopener">Open this link</a>
-</div>
-<div class="mono" id="url" style="margin-top: 8px;"></div>
-</div>
+        <div class="actions">
+          <button id="gen" class="btn-primary" type="button">Generate Link</button>
+          <button id="copy" type="button">Copy URL</button>
+        </div>
 
+        <div class="output" id="out" hidden>
+          <p class="output-title">Generated link</p>
+          <div class="link-row">
+            <a id="link" href="#" rel="noopener">Open this link</a>
+          </div>
+          <div class="mono" id="url"></div>
+        </div>
+
+        <div class="hint">
+          Tip: If the message is empty, the page will display the browser name (User-Agent equivalent).
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-badge" aria-hidden="true"></span>
+    <span class="toast-text">Copied</span>
+  </div>
 </body>
 </html>
