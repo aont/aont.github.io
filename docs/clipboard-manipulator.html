@@ -414,8 +414,10 @@
           await guardClipboardPermissions("write");
 
           const htmlText = textarea.value;
+          const htmlDoc = new DOMParser().parseFromString(htmlText, "text/html");
+          const plainText = htmlDoc.body ? htmlDoc.body.innerText : "";
           const blobHtml = new Blob([htmlText], { type: "text/html" });
-          const blobPlain = new Blob(["(HTML content)"], { type: "text/plain" });
+          const blobPlain = new Blob([plainText], { type: "text/plain" });
           const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain })];
 
           await navigator.clipboard.write(data);
