@@ -378,6 +378,12 @@
   updatePresetBadge();
   setTheme("light"); // white background default
 
+  function htmlToText(html){
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    return wrapper.innerText || "";
+  }
+
   async function processClipboard(){
     $process.disabled = true;
     setStatus('Processing…', 'warn');
@@ -387,7 +393,31 @@
         throw new Error('Clipboard API is not available. Make sure you are running over HTTPS and that your browser supports it.');
       }
 
-      const text = await navigator.clipboard.readText();
+      let text = "";
+
+      if (navigator.clipboard.read){
+        try{
+          const items = await navigator.clipboard.read();
+          let htmlPayload = "";
+          for (const item of items){
+            if (item.types && item.types.includes("text/html")){
+              const htmlBlob = await item.getType("text/html");
+              htmlPayload = await htmlBlob.text();
+              break;
+            }
+          }
+          if (htmlPayload){
+            text = htmlToText(htmlPayload);
+            appendLog('HTML detected in clipboard; converted to text');
+          }
+        }catch(readError){
+          appendLog(`Clipboard HTML read failed: ${readError && readError.message ? readError.message : String(readError)}`);
+        }
+      }
+
+      if (!text){
+        text = await navigator.clipboard.readText();
+      }
 
       if(!text){
         setStatus('Clipboard is empty', 'warn');
