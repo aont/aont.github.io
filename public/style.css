@@ -104,7 +104,6 @@
   box-shadow: var(--shadow);
 }
 
-
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -152,7 +151,6 @@
 .form-textarea {
   min-height: 220px;
 }
-
 
 .form-input-radio,
 .form-input-checkbox {
@@ -386,6 +384,7 @@ section + section {
 
 .card-body {
   margin-top: .75rem;
+  min-width: 0;
 }
 
 input[type='text'],
@@ -405,6 +404,7 @@ textarea,
 textarea,
 .editor {
   min-height: 160px;
+  box-sizing: border-box;
 }
 
 button,
@@ -441,6 +441,23 @@ button,
   background: var(--status-inactive-bg);
   color: var(--status-inactive-text);
   border: 1px solid var(--input-border);
+}
+
+.bookmarklet-actions {
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.bookmarklet-actions > * {
+  min-width: 0;
+}
+
+.bookmarklet-link {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 a { color: var(--btn-primary); }
