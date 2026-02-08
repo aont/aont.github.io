@@ -369,6 +369,10 @@ section + section {
   margin-top: 1rem;
 }
 
+.status-card {
+  margin-top: 1rem;
+}
+
 .card-header,
 .field,
 .control,
