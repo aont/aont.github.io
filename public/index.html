@@ -4,169 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Utility Page Directory</title>
-  <style>
-    :root {
-      /* Default: white theme */
-      --bg: #ffffff;
-      --card: #f8fafc;
-      --text: #0f172a;
-      --muted: #475569;
-      --accent: #2563eb;
-      --radius: 12px;
-    }
-
-    /* Dark theme override */
-    :root[data-theme="dark"] {
-      --bg: #0b0f1a;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 32px 20px;
-    }
-
-    h1 {
-      margin-top: 0;
-      margin-bottom: 12px;
-      font-size: 24px;
-    }
-
-    p.lead {
-      margin-top: 0;
-      margin-bottom: 24px;
-      color: var(--muted);
-      max-width: 760px;
-      line-height: 1.5;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-      max-width: 960px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 16px;
-      border: 1px solid rgba(0,0,0,.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,.10);
-    }
-
-    :root[data-theme="dark"] .card {
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-
-    .card h2 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    .card a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 650;
-    }
-
-    .card a:hover { text-decoration: underline; }
-
-    /* Unobtrusive theme toggle */
-    .theme-toggle {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 10;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.75);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 20px rgba(0,0,0,.10);
-      color: var(--text);
-      font-size: 12px;
-      user-select: none;
-    }
-
-    :root[data-theme="dark"] .theme-toggle {
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(17,24,39,.72);
-      box-shadow: 0 8px 20px rgba(0,0,0,.35);
-    }
-
-    .theme-toggle input {
-      width: 38px;
-      height: 22px;
-      appearance: none;
-      -webkit-appearance: none;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.18);
-      background: rgba(0,0,0,.10);
-      position: relative;
-      cursor: pointer;
-      outline: none;
-    }
-
-    :root[data-theme="dark"] .theme-toggle input {
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.14);
-    }
-
-    .theme-toggle input::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      transform: translateY(-50%);
-      border-radius: 50%;
-      background: var(--text);
-      opacity: .85;
-      transition: left .15s ease;
-    }
-
-    :root[data-theme="dark"] .theme-toggle input::after {
-      background: #e5e7eb;
-      opacity: .9;
-    }
-
-    .theme-toggle input:checked::after {
-      left: 19px;
-    }
-
-    .theme-toggle .label {
-      white-space: nowrap;
-      color: var(--muted);
-    }
-  </style>
+  
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <!-- Unobtrusive theme selector (default: white) -->
+<body class="theme-root page-body">
+  <main class="page-main">
+<!-- Unobtrusive theme selector (default: white) -->
   <label class="theme-toggle" aria-label="Theme">
     <span class="label">Dark</span>
     <input id="themeSwitch" type="checkbox" role="switch" aria-label="Toggle dark theme" />
@@ -273,5 +116,6 @@
       });
     })();
   </script>
+  </main>
 </body>
 </html>

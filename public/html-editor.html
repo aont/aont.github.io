@@ -4,79 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>簡易HTMLエディタ</title>
-  <style>
-    :root { --border:#d0d7de; --bg:#fff; --muted:#f6f8fa; --text:#24292f; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans JP", sans-serif; color:var(--text); }
-    .wrap { max-width:1100px; margin:24px auto; padding:0 16px; }
-
-    /* 追加: ツール名表示 */
-    .titlebar {
-      display:flex; align-items:baseline; gap:12px;
-      margin-bottom: 10px;
-    }
-    .titlebar h1 {
-      margin:0;
-      font-size: 20px;
-      letter-spacing: 0.2px;
-    }
-    .titlebar .sub {
-      color:#57606a;
-      font-size: 12px;
-    }
-
-    .toolbar {
-      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
-      padding:12px; border:1px solid var(--border); background:var(--muted); border-radius:10px;
-    }
-    .toolbar button, .toolbar select, .toolbar input[type="color"], .toolbar label {
-      border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:8px 10px; font-size:14px;
-    }
-    .toolbar button { cursor:pointer; }
-    .toolbar button:hover { background:#f3f4f6; }
-    .toolbar button[aria-pressed="true"] { outline: 2px solid #0969da; outline-offset: 1px; }
-    .spacer { flex:1; }
-    .editor {
-      margin-top:12px; border:1px solid var(--border); border-radius:10px;
-      min-height:280px; padding:14px; background:var(--bg); line-height:1.7;
-    }
-    .editor:focus { outline:2px solid #0969da; outline-offset:2px; }
-    .grid { display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px; }
-    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
-    textarea {
-      width:100%; min-height:220px; resize:vertical; border:1px solid var(--border);
-      border-radius:10px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size:13px; line-height:1.5;
-    }
-    .panelTitle { margin:0 0 6px 2px; font-size:13px; color:#57606a; }
-    .hint { margin:10px 2px 0; font-size:12px; color:#57606a; }
-    kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      border:1px solid var(--border); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:#fff; }
-
-    /* 行間が広くなる問題対策 */
-    #editor p, #editor h1, #editor h2, #editor h3, #preview p, #preview h1, #preview h2, #preview h3 { margin: 0; }
-
-    .loadBox {
-      margin-top: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      background: var(--muted);
-    }
-    .loadRow {
-      display:flex; flex-wrap:wrap; gap:8px; align-items:center;
-      margin-bottom: 8px;
-    }
-    .loadRow input[type="file"] { border: none; padding: 0; background: transparent; }
-    .loadRow label {
-      display:flex; gap:8px; align-items:center;
-      border: none;
-      padding: 0;
-      background: transparent;
-    }
-  </style>
+  
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div class="wrap">
+<body class="theme-root page-body">
+  <main class="page-main">
+<div class="wrap">
     <div class="titlebar">
       <h1 id="headingMain">簡易HTMLエディタ</h1>
       <div class="sub" id="subHeading">contenteditable + execCommand / Debug + Sanitize / Load & Insert</div>
@@ -857,5 +790,6 @@
     syncOutputs();
     syncActiveStates();
   </script>
+  </main>
 </body>
 </html>
