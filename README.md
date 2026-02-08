@@ -6,7 +6,7 @@ This repository contains a small collection of bookmarklets and helper pages for
 
 - **public/** – Static pages that receive state from the bookmarklets.
   - `suspend.html` displays a large link back to the original page when opened with query parameters.
-  - `clipboard_format.html`, `clipboard_manipulator.html`, `js_format.html`, and `open_blank.html` provide additional clipboard utilities and helpers.
+  - `clipboard-format.html`, `clipboard-manipulator.html`, `chatgpt-bookmarklet.html`, `html-editor.html`, `open-blank.html`, and `suspend-manual.html` provide additional clipboard utilities and helper pages.
 - **bookmarklet/** – Bookmarklet source and minified builds. `kill.js` redirects the browser to the hosted `suspend.html` page while preserving the current tab's title, URL, and favicons.
 
 ## Usage
