@@ -6,6 +6,27 @@
   <title>Utility Page Directory</title>
   
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .index-card-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .index-card-grid .card + .card {
+      margin-top: 0;
+    }
+
+    @media (min-width: 700px) {
+      .index-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1080px) {
+      .index-card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
   <script defer src="theme-selector.js"></script>
 </head>
 <body class="theme-root page-body">
@@ -13,7 +34,7 @@
 <h1>Utility Page Directory</h1>
   <p class="lead">Quick links to the standalone tools in this folder. Each card explains what the page does and links directly to the HTML file.</p>
 
-  <div class="grid">
+  <div class="grid index-card-grid">
     <div class="card">
       <h2>ChatGPT Bookmarklet Generator</h2>
       <p>Creates a bookmarklet that injects a multi-line prompt template into the ChatGPT prompt box so you can save and reuse prompts quickly.</p>
