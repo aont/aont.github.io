@@ -54,6 +54,6 @@
     applyTheme(initialMode);
 
     const control = createControl(initialMode);
-    pageMain.insertBefore(control, pageMain.firstChild);
+    pageMain.appendChild(control);
   });
 })();
