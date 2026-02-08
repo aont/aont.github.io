@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f3f6fb;
+  --panel: #ffffff;
+  --text: #1c2430;
+  --muted: #5e6a7d;
+  --line: #d7dfeb;
+  --ok-bg: #e8f7ee;
+  --ok: #1f7a44;
+  --err-bg: #ffeaea;
+  --err: #a12424;
+  --warn-bg: #fff7e5;
+  --warn: #8a5a00;
+}
+body { font-family: system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+main { max-width: 980px; margin: 1.5rem auto; padding: 1rem; }
+.page-title { margin: 0 0 .5rem; }
+.lead { color: var(--muted); margin: 0 0 1rem; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; margin: .9rem 0; }
+.card h2, .card h3 { margin: 0 0 .5rem; }
+.grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); }
+label { font-size: .9rem; color: var(--muted); display: block; margin-bottom: .3rem; }
+input, textarea, select, .fake-input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: .6rem; }
+textarea { min-height: 96px; }
+.row { display: flex; gap: .5rem; flex-wrap: wrap; }
+.btn { border: 1px solid #3a6ad6; color: #fff; background: #3a6ad6; border-radius: 8px; padding: .45rem .8rem; font-size: .9rem; }
+.btn.sub { border-color: #aeb9ca; background: #fff; color: #354053; }
+.btn.disabled { opacity: .5; }
+.pill { display: inline-block; padding: .2rem .6rem; border-radius: 999px; border: 1px solid var(--line); font-size: .8rem; }
+.status-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid #9fd6b5; }
+.status-err { background: var(--err-bg); color: var(--err); border: 1px solid #e7a8a8; }
+.status-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #e8cc9d; }
+.preview-img { width: 100%; border-radius: 10px; border: 1px solid var(--line); min-height: 120px; object-fit: cover; }
+.toolbar { display: flex; gap: .35rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.toolbar .btn { padding: .35rem .55rem; }
+.toolbar .active { background: #2255cc; }
+.toolbar .off { background: #fff; color: #344154; border-color: #b7c0cf; }
+a { color: #1f53c5; }
