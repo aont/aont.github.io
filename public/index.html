@@ -6,16 +6,11 @@
   <title>Utility Page Directory</title>
   
   <link rel="stylesheet" href="style.css" />
+  <script defer src="theme-selector.js"></script>
 </head>
 <body class="theme-root page-body">
   <main class="page-main">
-<!-- Unobtrusive theme selector (default: white) -->
-  <label class="theme-toggle" aria-label="Theme">
-    <span class="label">Dark</span>
-    <input id="themeSwitch" type="checkbox" role="switch" aria-label="Toggle dark theme" />
-  </label>
-
-  <h1>Utility Page Directory</h1>
+<h1>Utility Page Directory</h1>
   <p class="lead">Quick links to the standalone tools in this folder. Each card explains what the page does and links directly to the HTML file.</p>
 
   <div class="grid">
@@ -89,33 +84,6 @@
     </div>
   </div>
 
-  <script>
-    (function () {
-      const STORAGE_KEY = "utilityDirTheme"; // "light" | "dark"
-      const root = document.documentElement;
-      const themeSwitch = document.getElementById("themeSwitch");
-
-      function applyTheme(theme) {
-        if (theme === "dark") {
-          root.setAttribute("data-theme", "dark");
-          themeSwitch.checked = true;
-        } else {
-          root.removeAttribute("data-theme");
-          themeSwitch.checked = false;
-        }
-      }
-
-      // Default is white (light). Only apply dark if user previously chose it.
-      const saved = localStorage.getItem(STORAGE_KEY);
-      applyTheme(saved === "dark" ? "dark" : "light");
-
-      themeSwitch.addEventListener("change", () => {
-        const theme = themeSwitch.checked ? "dark" : "light";
-        localStorage.setItem(STORAGE_KEY, theme);
-        applyTheme(theme);
-      });
-    })();
-  </script>
   </main>
 </body>
 </html>

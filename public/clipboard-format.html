@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Clipboard Processor</title>
   
   <link rel="stylesheet" href="style.css" />
+  <script defer src="theme-selector.js"></script>
 </head>
 <body class="theme-root page-body">
   <main class="page-main">
@@ -41,25 +42,6 @@
 
     <button id="process" type="button">Format and overwrite clipboard</button>
 
-    <!-- Theme UI をボタンより下に移動 -->
-    <div class="card controls">
-      <div class="control">
-        <div style="min-width: 120px;">
-          <label for="theme">Theme</label>
-          <div class="pill" id="themeBadge" style="display:inline-block;margin-top:6px;">light</div>
-        </div>
-        <div style="flex:1; min-width: 220px;">
-          <select id="theme" aria-label="Theme">
-            <option value="light" selected>Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-      </div>
-      <p class="hint">
-        Theme changes the UI only (does not affect clipboard formatting).
-      </p>
-    </div>
-
     <div class="card status">
       <div class="row" style="width:100%">
         <div id="status" class="pill">Idle</div>
@@ -87,8 +69,6 @@
   const $preset = document.getElementById('preset');
   const $presetBadge = document.getElementById('presetBadge');
 
-  const $theme = document.getElementById('theme');
-  const $themeBadge = document.getElementById('themeBadge');
 
   function nowStamp(){
     const d = new Date();
@@ -161,25 +141,14 @@
     $presetBadge.textContent = key;
   }
 
-  function setTheme(theme){
-    const t = (theme === "dark") ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", t);
-    $theme.value = t;
-    $themeBadge.textContent = t;
-  }
 
   $preset.addEventListener('change', () => {
     updatePresetBadge();
     appendLog(`Preset changed: ${$preset.value} (${PRESETS[$preset.value]?.name || "unknown"})`);
   });
 
-  $theme.addEventListener('change', () => {
-    setTheme($theme.value);
-    appendLog(`Theme changed: ${$theme.value}`);
-  });
 
   updatePresetBadge();
-  setTheme("light"); // white background default
 
   function htmlToText(html){
     const wrapper = document.createElement('div');
