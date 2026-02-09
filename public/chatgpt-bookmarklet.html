@@ -46,7 +46,7 @@
     .header{
       display: flex;
       align-items: flex-start;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 16px;
       margin-bottom: 18px;
     }
@@ -66,39 +66,10 @@
       max-width: 62ch;
     }
 
-    .badge{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: #fff;
-      box-shadow: var(--shadow-sm);
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-      user-select: none;
-    }
-    .dot{
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(37,99,235,0.10);
-    }
-
     .grid{
       display: grid;
       gap: 16px;
     }
-    @media (min-width: 900px){
-      .grid{
-        grid-template-columns: 1.1fr 0.9fr;
-        align-items: start;
-      }
-    }
-
     .card{
       background: var(--panel);
       border: 1px solid var(--border);
@@ -283,10 +254,6 @@
         <p class="subtitle">
           Paste your prompt template, generate a bookmarklet, then drag the bookmarklet link to your browser’s bookmarks bar.
         </p>
-      </div>
-      <div class="badge" aria-label="App status">
-        <span class="dot" aria-hidden="true"></span>
-        <span>White background • Modern UI</span>
       </div>
     </div>
 
