@@ -11,28 +11,31 @@
     <h1 class="h3 mb-3">Markdown Reference Converter</h1>
     <p class="text-body-secondary mb-4">Convert reference-style links to inline links and append a references list.</p>
 
-    <div class="row g-3 align-items-end mb-3">
-      <div class="col-12 col-md-6 col-lg-4">
-        <label for="headingInput" class="form-label">References heading text</label>
-        <input id="headingInput" type="text" class="form-control" value="References" />
-      </div>
-      <div class="col-12 col-md-6 col-lg-8 d-flex flex-wrap gap-2">
-        <button id="convertBtn" class="btn btn-primary">Convert</button>
-        <button id="copyBtn" class="btn btn-outline-success">Copy</button>
-        <button id="pasteBtn" class="btn btn-outline-secondary">Paste</button>
-      </div>
-    </div>
-
-    <div id="status" class="alert d-none" role="status" aria-live="polite"></div>
-
     <div class="row g-3">
-      <div class="col-12 col-lg-6">
-        <label for="inputMarkdown" class="form-label">Input Markdown</label>
+      <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+          <label for="inputMarkdown" class="form-label mb-0">Input Markdown</label>
+          <button id="pasteBtn" class="btn btn-outline-secondary btn-sm">Paste</button>
+        </div>
         <textarea id="inputMarkdown" class="form-control font-monospace" rows="18" placeholder="Paste markdown here"></textarea>
       </div>
-      <div class="col-12 col-lg-6">
-        <label for="outputMarkdown" class="form-label">Output Markdown</label>
+
+      <div class="col-12 d-flex flex-column align-items-start gap-2">
+        <button id="convertBtn" class="btn btn-primary">Convert</button>
+        <div id="status" class="alert d-none mb-0" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="col-12">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+          <label for="outputMarkdown" class="form-label mb-0">Output Markdown</label>
+          <button id="copyBtn" class="btn btn-outline-success btn-sm">Copy</button>
+        </div>
         <textarea id="outputMarkdown" class="form-control font-monospace" rows="18" readonly></textarea>
+
+        <div class="mt-3">
+          <label for="headingInput" class="form-label">References heading text</label>
+          <input id="headingInput" type="text" class="form-control" value="References" />
+        </div>
       </div>
     </div>
   </div>
