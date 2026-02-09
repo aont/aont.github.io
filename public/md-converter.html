@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Markdown Reference Converter</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body class="bg-body-tertiary">
+  <div class="container py-4 py-md-5">
+    <h1 class="h3 mb-3">Markdown Reference Converter</h1>
+    <p class="text-body-secondary mb-4">Convert reference-style links to inline links and append a references list.</p>
+
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-12 col-md-6 col-lg-4">
+        <label for="headingInput" class="form-label">References heading text</label>
+        <input id="headingInput" type="text" class="form-control" value="References" />
+      </div>
+      <div class="col-12 col-md-6 col-lg-8 d-flex flex-wrap gap-2">
+        <button id="convertBtn" class="btn btn-primary">Convert</button>
+        <button id="copyBtn" class="btn btn-outline-success">Copy</button>
+        <button id="pasteBtn" class="btn btn-outline-secondary">Paste</button>
+      </div>
+    </div>
+
+    <div id="status" class="alert d-none" role="status" aria-live="polite"></div>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <label for="inputMarkdown" class="form-label">Input Markdown</label>
+        <textarea id="inputMarkdown" class="form-control font-monospace" rows="18" placeholder="Paste markdown here"></textarea>
+      </div>
+      <div class="col-12 col-lg-6">
+        <label for="outputMarkdown" class="form-label">Output Markdown</label>
+        <textarea id="outputMarkdown" class="form-control font-monospace" rows="18" readonly></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inputEl = document.getElementById('inputMarkdown');
+    const outputEl = document.getElementById('outputMarkdown');
+    const headingEl = document.getElementById('headingInput');
+    const statusEl = document.getElementById('status');
+
+    function setStatus(type, text) {
+      statusEl.className = `alert alert-${type}`;
+      statusEl.textContent = text;
+    }
+
+    function clearStatus() {
+      statusEl.className = 'alert d-none';
+      statusEl.textContent = '';
+    }
+
+    function normalizeId(id) {
+      return id.trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    function escapeTooltip(text) {
+      return text.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    function parseDefinition(line) {
+      const defMatch = line.match(/^\s*\[([^\]]+)\]:\s*(.*)$/);
+      if (!defMatch) return null;
+
+      const id = defMatch[1].trim();
+      let rest = defMatch[2].trim();
+      if (!rest) return null;
+
+      let url = '';
+      if (rest.startsWith('<')) {
+        const close = rest.indexOf('>');
+        if (close === -1) return null;
+        url = rest.slice(1, close).trim();
+        rest = rest.slice(close + 1).trim();
+      } else {
+        const m = rest.match(/^(\S+)(?:\s+(.*))?$/);
+        if (!m) return null;
+        url = m[1].trim();
+        rest = (m[2] || '').trim();
+      }
+
+      let title = '';
+      if (rest) {
+        const t = rest.match(/^(?:"([\s\S]*)"|'([\s\S]*)'|\(([\s\S]*)\))\s*$/);
+        if (t) {
+          title = (t[1] ?? t[2] ?? t[3] ?? '').trim();
+        }
+      }
+
+      return { id, url, title };
+    }
+
+    function headingExists(markdown, headingText) {
+      const escaped = headingText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`^\\s{0,3}#{1,6}\\s+${escaped}\\s*$`, 'im');
+      return regex.test(markdown);
+    }
+
+    function convertMarkdown(markdown, headingText) {
+      const lines = markdown.split(/\r?\n/);
+      const defs = new Map();
+      const bodyLines = [];
+
+      for (const line of lines) {
+        const def = parseDefinition(line);
+        if (def) {
+          defs.set(normalizeId(def.id), def);
+        } else {
+          bodyLines.push(line);
+        }
+      }
+
+      const usedOrder = [];
+      const usedSet = new Set();
+      const body = bodyLines.join('\n');
+
+      const convertedBody = body.replace(/(!?)\[([^\]]+)\]\[([^\]]*)\]/g, (full, bang, label, idPart) => {
+        if (bang === '!') return full;
+
+        const sourceId = idPart.trim() ? idPart.trim() : label.trim();
+        const def = defs.get(normalizeId(sourceId));
+        if (!def) return full;
+
+        if (!usedSet.has(normalizeId(def.id))) {
+          usedSet.add(normalizeId(def.id));
+          usedOrder.push(def.id);
+        }
+
+        const tooltip = def.title
+          ? `${label}: ${def.title} ${def.url}`
+          : `${label} ${def.url}`;
+
+        return `[${def.id}](${def.url} "${escapeTooltip(tooltip)}")`;
+      });
+
+      const trimmedBody = convertedBody.trimEnd();
+      if (!usedOrder.length) {
+        return trimmedBody;
+      }
+
+      if (headingExists(trimmedBody, headingText)) {
+        return trimmedBody;
+      }
+
+      const refLines = usedOrder.map((id) => {
+        const def = defs.get(normalizeId(id));
+        const titleOrUrl = def.title || def.url;
+        return `- (${def.id}) ${titleOrUrl} [${def.url}](${def.url})`;
+      });
+
+      return `${trimmedBody}\n\n## ${headingText}\n\n${refLines.join('\n')}`;
+    }
+
+    document.getElementById('convertBtn').addEventListener('click', () => {
+      clearStatus();
+      try {
+        const heading = headingEl.value.trim() || 'References';
+        outputEl.value = convertMarkdown(inputEl.value, heading);
+        setStatus('success', 'Converted successfully.');
+      } catch (err) {
+        setStatus('danger', `Conversion failed: ${err.message}`);
+      }
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      clearStatus();
+      const text = outputEl.value;
+      if (!text) {
+        setStatus('warning', 'Output is empty. Convert text first.');
+        return;
+      }
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          setStatus('success', 'Copied output to clipboard.');
+        } else {
+          outputEl.focus();
+          outputEl.select();
+          setStatus('warning', 'Clipboard API unavailable. Output selected for manual copy.');
+        }
+      } catch (err) {
+        outputEl.focus();
+        outputEl.select();
+        setStatus('warning', `Clipboard write failed. Output selected for manual copy. (${err.message})`);
+      }
+    });
+
+    document.getElementById('pasteBtn').addEventListener('click', async () => {
+      clearStatus();
+      try {
+        if (!navigator.clipboard?.readText) {
+          setStatus('danger', 'Clipboard read is unavailable in this browser/context.');
+          return;
+        }
+        const text = await navigator.clipboard.readText();
+        inputEl.value = text;
+        setStatus('success', 'Pasted clipboard text into input.');
+      } catch (err) {
+        setStatus('danger', `Paste failed (often blocked outside HTTPS): ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>
