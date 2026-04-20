@@ -210,8 +210,8 @@
     <div class="card">
       <h1>Clipboard Processor</h1>
       <p class="desc">
-        Reads text from your clipboard, converts line breaks into <code>&lt;div&gt;</code>-based HTML, and writes both
-        <code>text/plain</code> and <code>text/html</code> back to the clipboard.<br>
+        Reads text from your clipboard, converts line breaks into <code>&lt;div&gt;</code>-based HTML, and writes
+        <code>text/html</code> back to the clipboard.<br>
         Note: On mobile, clipboard permissions and HTML writes may be restricted depending on the browser.
       </p>
     </div>
@@ -461,12 +461,11 @@
       appendLog(`Applied preset style to all span/div elements: ${presetKey}`);
 
       await navigator.clipboard.write([new ClipboardItem({
-        "text/plain": new Blob([text], {type:"text/plain"}),
         "text/html" : new Blob([htmlText], {type:"text/html"})
       })]);
 
       setStatus('Done', 'ok');
-      appendLog('Clipboard write completed (text/plain + text/html)');
+      appendLog('Clipboard write completed (text/html only)');
 
     }catch(e){
       setStatus('Failed', 'err');
