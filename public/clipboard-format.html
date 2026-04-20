@@ -325,6 +325,12 @@
     return `<div style="${preset.style}">${c}</div>`;
   }
 
+  function convertLineWithoutStyle(lineEscaped) {
+    let c = lineEscaped;
+    if (c === "") c = "<br>";
+    return `<div>${c}</div>`;
+  }
+
   const PRESETS = {
     sansDiv: {
       name: "DIV + sans-serif",
@@ -350,6 +356,23 @@
       return preset.convertAll(linesEscaped);
     }
     return linesEscaped.reduce((a, c) => a + convertLine(c, preset), "");
+  }
+
+  function toHtmlWithoutStyle(text){
+    const lines = text.split(/\r?\n/);
+    const linesEscaped = lines.map(escapeHtml);
+    return linesEscaped.reduce((a, c) => a + convertLineWithoutStyle(c), "");
+  }
+
+  function applyPresetStyleToHtml(html, presetKey){
+    const key = PRESETS[presetKey] ? presetKey : "default";
+    const preset = PRESETS[key];
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    wrapper.querySelectorAll('span, div').forEach((el) => {
+      el.setAttribute('style', preset.style);
+    });
+    return wrapper.innerHTML;
   }
 
   function updatePresetBadge(){
@@ -393,11 +416,11 @@
       }
 
       let text = "";
+      let htmlPayload = "";
 
       if (navigator.clipboard.read){
         try{
           const items = await navigator.clipboard.read();
-          let htmlPayload = "";
           for (const item of items){
             if (item.types && item.types.includes("text/html")){
               const htmlBlob = await item.getType("text/html");
@@ -407,7 +430,7 @@
           }
           if (htmlPayload){
             text = htmlToText(htmlPayload);
-            appendLog('HTML detected in clipboard; converted to text');
+            appendLog('HTML detected in clipboard; style targets: all span/div elements');
           }
         }catch(readError){
           appendLog(`Clipboard HTML read failed: ${readError && readError.message ? readError.message : String(readError)}`);
@@ -429,8 +452,13 @@
       appendLog(`Input detected (${text.length} characters)`);
 
       const presetKey = $preset.value;
-      const htmlText = toHtml(text, presetKey);
-      appendLog(`HTML generated with preset: ${presetKey}`);
+      let baseHtml = htmlPayload;
+      if (!baseHtml){
+        baseHtml = toHtmlWithoutStyle(text);
+        appendLog('No HTML in clipboard; converted text to unstyled HTML');
+      }
+      const htmlText = applyPresetStyleToHtml(baseHtml, presetKey);
+      appendLog(`Applied preset style to all span/div elements: ${presetKey}`);
 
       await navigator.clipboard.write([new ClipboardItem({
         "text/plain": new Blob([text], {type:"text/plain"}),
