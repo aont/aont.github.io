@@ -252,7 +252,7 @@
         <button id="btnPreviewFont">Preview Font Size (local)</button>
       </div>
       <p class="small" style="margin-top:10px;">
-        “Wrap as HTML” writes <code class="kbd">text/html</code> and <code class="kbd">text/plain</code> to the clipboard.
+        “Wrap as HTML” writes only <code class="kbd">text/html</code> to the clipboard.
       </p>
     </section>
 
@@ -414,11 +414,8 @@
           await guardClipboardPermissions("write");
 
           const htmlText = textarea.value;
-          const htmlDoc = new DOMParser().parseFromString(htmlText, "text/html");
-          const plainText = htmlDoc.body ? htmlDoc.body.innerText : "";
           const blobHtml = new Blob([htmlText], { type: "text/html" });
-          const blobPlain = new Blob([plainText], { type: "text/plain" });
-          const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain })];
+          const data = [new ClipboardItem({ "text/html": blobHtml })];
 
           await navigator.clipboard.write(data);
           setStatus("Wrote HTML to clipboard.", "ok");
@@ -462,14 +459,13 @@
           await guardClipboardPermissions("write");
 
           const v = Number(fontSize.value || 16);
-          const plainText = textarea.value;
+          const sourceText = textarea.value;
 
           // Wrap as HTML safely
-          const htmlText = `<span style="font-size:${v}px;">${escapeHtml(plainText)}</span>`;
+          const htmlText = `<span style="font-size:${v}px;">${escapeHtml(sourceText)}</span>`;
 
           const blobHtml = new Blob([htmlText], { type: "text/html" });
-          const blobPlain = new Blob([plainText], { type: "text/plain" });
-          const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobPlain })];
+          const data = [new ClipboardItem({ "text/html": blobHtml })];
 
           await navigator.clipboard.write(data);
           setStatus(`Wrote wrapped HTML with font size ${v}px to clipboard.`, "ok");
