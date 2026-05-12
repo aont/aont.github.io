@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>suspend</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const target = new URL('./suspend/suspend.html', window.location.href).href;
+
+      const nextUrl =
+        target +
+        window.location.search +
+        window.location.hash;
+
+      window.location.href = nextUrl;
+    });
+  </script>
+</head>
+<body>
+</body>
+</html>
