@@ -257,6 +257,32 @@
       background: linear-gradient(135deg, var(--accent), var(--accent2));
     }
 
+
+
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg: #0b1120;
+        --panel: #111827;
+        --border: rgba(148, 163, 184, .32);
+        --border2: rgba(148, 163, 184, .26);
+        --text: rgba(241, 245, 249, .94);
+        --muted: rgba(226, 232, 240, .78);
+        --muted2: rgba(203, 213, 225, .72);
+        --shadow: 0 14px 40px rgba(2, 6, 23, .55);
+      }
+
+      .chip{ background: rgba(148,163,184,.10); }
+      textarea{ background: #0f172a; box-shadow: inset 0 1px 0 rgba(148,163,184,.08); }
+      textarea::placeholder{ color: rgba(203,213,225,.60); }
+      button{ background: #0f172a; }
+      button:hover{ background: rgba(148,163,184,.14); border-color: rgba(148,163,184,.40); }
+      .output{ background: rgba(148,163,184,.08); }
+      a{ color: rgba(224,231,255,.96); }
+      .mono{ background: #0f172a; color: rgba(226,232,240,.90); }
+      .banner{ color: rgba(255,251,235,.95); }
+      .toast{ background: rgba(15,23,42,.92); color: rgba(241,245,249,.95); box-shadow: 0 18px 50px rgba(2, 6, 23, .58); }
+    }
+
     @media (prefers-reduced-motion: reduce){
       * { transition: none !important; }
     }
@@ -303,16 +329,36 @@
           );
           if (w) {
             // Avoid XSS: build elements and set textContent
+            const style = w.document.createElement("style");
+            style.textContent = `
+              :root { color-scheme: light dark; }
+              body {
+                margin: 0;
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+                font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+                background: #ffffff;
+                color: #0f172a;
+              }
+              a {
+                color: inherit;
+                font-weight: 700;
+                text-decoration: none;
+              }
+              @media (prefers-color-scheme: dark) {
+                body {
+                  background: #020617;
+                  color: #e2e8f0;
+                }
+              }
+            `;
+            w.document.head.appendChild(style);
+
             const link = w.document.createElement("a");
             link.href = "about:blank";
             link.target = "_blank";
             link.textContent = displayText;
-
-            // Basic popup layout
-            w.document.body.style.margin = "0";
-            w.document.body.style.display = "grid";
-            w.document.body.style.placeItems = "center";
-            w.document.body.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
             w.document.body.appendChild(link);
           }
           resolve(w);
