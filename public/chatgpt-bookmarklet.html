@@ -9,25 +9,34 @@
     :root{
       --bg: #ffffff;
       --panel: #ffffff;
-      --text: #0f172a;       /* slate-900 */
-      --muted: #475569;      /* slate-600 */
-      --border: #e2e8f0;     /* slate-200 */
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
       --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
       --shadow-sm: 0 6px 18px rgba(15, 23, 42, 0.06);
-      --ring: rgba(59,130,246,0.28); /* blue-500 */
-      --accent: #2563eb;     /* blue-600 */
-      --accent2: #1d4ed8;    /* blue-700 */
-      --success: #16a34a;    /* green-600 */
+      --ring: rgba(59,130,246,0.28);
+      --accent: #2563eb;
+      --accent2: #1d4ed8;
+      --success: #16a34a;
       --success-bg: rgba(22,163,74,0.08);
-      --danger: #dc2626;     /* red-600 */
+      --danger: #dc2626;
       --danger-bg: rgba(220,38,38,0.08);
       --radius: 16px;
       --radius-sm: 12px;
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+        "Segoe UI Emoji";
     }
 
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
     body{
       margin: 0;
       font-family: var(--font);
@@ -80,6 +89,7 @@
       white-space: nowrap;
       user-select: none;
     }
+
     .dot{
       width: 8px;
       height: 8px;
@@ -92,6 +102,7 @@
       display: grid;
       gap: 16px;
     }
+
     @media (min-width: 900px){
       .grid{
         grid-template-columns: 1.1fr 0.9fr;
@@ -135,15 +146,20 @@
       width: 100%;
       min-height: 180px;
       resize: vertical;
-      padding: 12px 12px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
       color: var(--text);
       background: #fff;
       outline: none;
-      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+      transition:
+        box-shadow .15s ease,
+        border-color .15s ease,
+        transform .15s ease;
     }
+
     textarea:focus{
       border-color: rgba(37,99,235,0.55);
       box-shadow: 0 0 0 4px var(--ring);
@@ -167,22 +183,34 @@
       background: #fff;
       color: var(--text);
       cursor: pointer;
-      transition: transform .08s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+      transition:
+        transform .08s ease,
+        box-shadow .15s ease,
+        border-color .15s ease,
+        background .15s ease;
       user-select: none;
     }
+
     .btn:hover{
       border-color: rgba(37,99,235,0.40);
       box-shadow: 0 10px 22px rgba(37,99,235,0.10);
     }
+
     .btn:active{
       transform: translateY(1px);
     }
+
     .btn-primary{
-      background: linear-gradient(180deg, rgba(37,99,235,0.96), rgba(29,78,216,0.96));
+      background: linear-gradient(
+        180deg,
+        rgba(37,99,235,0.96),
+        rgba(29,78,216,0.96)
+      );
       color: #fff;
       border-color: rgba(37,99,235,0.55);
       box-shadow: 0 12px 26px rgba(37,99,235,0.18);
     }
+
     .btn-primary:hover{
       box-shadow: 0 16px 34px rgba(37,99,235,0.22);
       border-color: rgba(37,99,235,0.70);
@@ -221,12 +249,17 @@
       border-radius: 999px;
       border: 1px solid rgba(37,99,235,0.25);
       background: rgba(37,99,235,0.05);
-      transition: box-shadow .15s ease, transform .08s ease, border-color .15s ease;
+      transition:
+        box-shadow .15s ease,
+        transform .08s ease,
+        border-color .15s ease;
     }
+
     .bookmarklet-link:hover{
       border-color: rgba(37,99,235,0.45);
       box-shadow: 0 12px 26px rgba(37,99,235,0.12);
     }
+
     .bookmarklet-link:active{
       transform: translateY(1px);
     }
@@ -241,12 +274,14 @@
       color: var(--muted);
       display: none;
     }
+
     .status.ok{
       display: block;
       border-color: rgba(22,163,74,0.35);
       background: var(--success-bg);
       color: #166534;
     }
+
     .status.err{
       display: block;
       border-color: rgba(220,38,38,0.35);
@@ -279,11 +314,16 @@
   <div class="container">
     <div class="header">
       <div>
-        <h1 class="title">ChatGPT Prompt Template Insert Bookmarklet Generator</h1>
+        <h1 class="title">
+          ChatGPT Prompt Template Insert Bookmarklet Generator
+        </h1>
+
         <p class="subtitle">
-          Paste your prompt template, generate a bookmarklet, then drag the bookmarklet link to your browser’s bookmarks bar.
+          Paste your prompt template, generate a bookmarklet, then drag the
+          bookmarklet link to your browser’s bookmarks bar.
         </p>
       </div>
+
       <div class="badge" aria-label="App status">
         <span class="dot" aria-hidden="true"></span>
         <span>White background • Modern UI</span>
@@ -291,41 +331,77 @@
     </div>
 
     <div class="grid">
-      <!-- Left: Input -->
       <section class="card" aria-labelledby="input-title">
         <div class="card-header">
           <h2 class="card-title" id="input-title">Prompt Template</h2>
         </div>
+
         <div class="card-body">
           <label for="inputText">Input Prompt Template</label>
-          <textarea id="inputText" placeholder="Input Prompt Template Here"></textarea>
+
+          <textarea
+            id="inputText"
+            placeholder="Input Prompt Template Here"
+          ></textarea>
 
           <div class="row">
-            <button class="btn btn-primary" onclick="convert()" id="generateBtn">Generate Bookmarklet</button>
-            <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+            <button
+              class="btn btn-primary"
+              onclick="convert()"
+              id="generateBtn"
+            >
+              Generate Bookmarklet
+            </button>
+
+            <button class="btn btn-ghost" onclick="clearAll()">
+              Clear
+            </button>
           </div>
 
           <p class="help">
-            Tip: Keep your template readable. Each new line will be inserted as a new paragraph in the ChatGPT input area.
+            The template is inserted as plain text before the existing content
+            in the ChatGPT input area.
           </p>
 
-          <div id="statusBox" class="status" role="status" aria-live="polite"></div>
+          <div
+            id="statusBox"
+            class="status"
+            role="status"
+            aria-live="polite"
+          ></div>
         </div>
       </section>
 
-      <!-- Right: Output -->
       <section class="card" aria-labelledby="output-title">
         <div class="card-header">
           <h2 class="card-title" id="output-title">Bookmarklet</h2>
         </div>
+
         <div class="card-body">
-          <div class="pill" style="width: 100%; justify-content: space-between; gap: 12px;">
-            <a href="about:blank" id="outputAnchor" class="bookmarklet-link" draggable="true">
+          <div
+            class="pill"
+            style="
+              width: 100%;
+              justify-content: space-between;
+              gap: 12px;
+            "
+          >
+            <a
+              href="about:blank"
+              id="outputAnchor"
+              class="bookmarklet-link"
+              draggable="true"
+            >
               <span aria-hidden="true">↗</span>
               <span>bookmarklet</span>
             </a>
 
-            <button class="btn" onclick="copyBookmarklet()" id="copyBtn" disabled>
+            <button
+              class="btn"
+              onclick="copyBookmarklet()"
+              id="copyBtn"
+              disabled
+            >
               Copy URL
             </button>
           </div>
@@ -334,11 +410,18 @@
 
           <div style="margin-top: 12px;">
             <label for="outputText">Bookmarklet URL</label>
-            <textarea id="outputText" placeholder="Bookmarklet Here" readonly></textarea>
+
+            <textarea
+              id="outputText"
+              placeholder="Bookmarklet Here"
+              readonly
+            ></textarea>
           </div>
 
           <div class="footer-note">
-            If the bookmarklet does nothing, ensure you are on the ChatGPT page and the message input exists as <code>#prompt-textarea</code>.
+            If the bookmarklet does nothing, ensure you are on the ChatGPT page
+            and the message input exists as
+            <code>#prompt-textarea</code> or <code>#chat-input</code>.
           </div>
         </div>
       </section>
@@ -348,12 +431,16 @@
   <script>
     function setStatus(type, message) {
       const box = document.getElementById("statusBox");
-      box.className = "status " + (type === "ok" ? "ok" : "err");
+
+      box.className =
+        "status " + (type === "ok" ? "ok" : "err");
+
       box.textContent = message;
     }
 
     function clearStatus() {
       const box = document.getElementById("statusBox");
+
       box.className = "status";
       box.textContent = "";
     }
@@ -361,60 +448,137 @@
     function clearAll() {
       document.getElementById("inputText").value = "";
       document.getElementById("outputText").value = "";
-      const a = document.getElementById("outputAnchor");
-      a.href = "about:blank";
+
+      const outputAnchor =
+        document.getElementById("outputAnchor");
+
+      outputAnchor.href = "about:blank";
+
       document.getElementById("copyBtn").disabled = true;
+
       clearStatus();
     }
 
     function convert() {
       clearStatus();
 
-      const input = document.getElementById("inputText").value;
+      const input =
+        document.getElementById("inputText").value;
 
       if (!input.trim()) {
-        setStatus("err", "Please input a prompt template first.");
+        setStatus(
+          "err",
+          "Please input a prompt template first."
+        );
+
         return;
       }
 
+      const promptInputList =
+        input.split(/\r?\n/);
+
       const jsCode =
-        "!async function(){const sleep=msec=>new Promise(r=>setTimeout(r,msec));" +
-        "const promptTextarea=document.querySelector(\"#prompt-textarea\");" +
-        "if(!promptTextarea){alert(\"#prompt-textarea not found. Open ChatGPT and click into the message box first.\");return;}" +
-        "const childNodesSaved=Array.from(promptTextarea.childNodes);" +
-        "const promptInputList=" + JSON.stringify(input.split(/\r?\n/)) + ";" +
-        "for(const promptLine of promptInputList){const p=document.createElement(\"p\");" +
-        "if(\"\"==promptLine){const br=document.createElement(\"br\");p.appendChild(br)}" +
-        "else p.textContent=promptLine;promptTextarea.appendChild(p)}" +
-        "for(const childNodeSaved of childNodesSaved){promptTextarea.removeChild(childNodeSaved);promptTextarea.appendChild(childNodeSaved);}" +
-        "await sleep(0);promptTextarea.lastChild&&promptTextarea.lastChild.scrollIntoView();}();";
+        "!async function(){" +
+        "const sleep=msec=>new Promise(resolve=>setTimeout(resolve,msec));" +
+
+        "const promptTextarea=document.querySelector(" +
+          "\"#prompt-textarea, #chat-input\"" +
+        ");" +
+
+        "if(!promptTextarea){" +
+          "alert(" +
+            "\"#prompt-textarea or #chat-input not found. " +
+            "Open ChatGPT and click into the message box first.\"" +
+          ");" +
+          "return;" +
+        "}" +
+
+        "const promptInputList=" +
+          JSON.stringify(promptInputList) +
+        ";" +
+
+        "const currentText=promptTextarea.innerText;" +
+
+        "promptTextarea.innerText=[" +
+          "...promptInputList," +
+          "currentText" +
+        "].join(\"\\n\");" +
+
+        "promptTextarea.dispatchEvent(" +
+          "new InputEvent(\"input\",{" +
+            "bubbles:true," +
+            "inputType:\"insertText\"," +
+            "data:null" +
+          "})" +
+        ");" +
+
+        "await sleep(0);" +
+
+        "promptTextarea.focus();" +
+
+        "const selection=window.getSelection();" +
+        "const range=document.createRange();" +
+
+        "range.selectNodeContents(promptTextarea);" +
+        "range.collapse(false);" +
+
+        "if(selection){" +
+          "selection.removeAllRanges();" +
+          "selection.addRange(range);" +
+        "}" +
+
+        "promptTextarea.scrollTop=promptTextarea.scrollHeight;" +
+        "}();";
 
       const bookmarkletUrl =
-        "javascript:" + jsCode.replaceAll("%", "%25").replaceAll("\"", "%22");
+        "javascript:" +
+        jsCode
+          .replaceAll("%", "%25")
+          .replaceAll("\"", "%22");
 
-      document.getElementById("outputText").value = bookmarkletUrl;
+      document.getElementById("outputText").value =
+        bookmarkletUrl;
 
-      const outputAnchor = document.getElementById("outputAnchor");
+      const outputAnchor =
+        document.getElementById("outputAnchor");
+
       outputAnchor.href = bookmarkletUrl;
 
       document.getElementById("copyBtn").disabled = false;
-      setStatus("ok", "Generated. Drag the “bookmarklet” link to your bookmarks bar, or copy the URL.");
+
+      setStatus(
+        "ok",
+        "Generated. Drag the “bookmarklet” link to your bookmarks bar, or copy the URL."
+      );
     }
 
     async function copyBookmarklet() {
-      const text = document.getElementById("outputText").value;
-      if (!text) return;
+      const output =
+        document.getElementById("outputText");
+
+      const text = output.value;
+
+      if (!text) {
+        return;
+      }
 
       try {
         await navigator.clipboard.writeText(text);
-        setStatus("ok", "Copied to clipboard.");
-      } catch (e) {
-        // Fallback
-        const output = document.getElementById("outputText");
+
+        setStatus(
+          "ok",
+          "Copied to clipboard."
+        );
+      } catch (error) {
         output.focus();
         output.select();
+
         document.execCommand("copy");
-        setStatus("ok", "Copied to clipboard (fallback).");
+
+        setStatus(
+          "ok",
+          "Copied to clipboard (fallback)."
+        );
       }
     }
   </script>
