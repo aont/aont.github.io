@@ -1,6 +1,8 @@
 # A Collection of Web Tools
 
-This repository contains a small collection of bookmarklets and helper pages for quickly suspending and manipulating web pages.
+A GitHub Pages landing site and collection of small browser utilities.
+
+This repository contains the pages served directly from the root site. The site directory also links to additional tools maintained in separate repositories and published as GitHub Pages project sites.
 
 ## Contents
 
