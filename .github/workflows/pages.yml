@@ -29,11 +29,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Upload public/ as-is as the Pages site artifact
+      - name: Prepare Pages artifact
+        run: |
+          cp -a public _site
+          python .github/scripts/generate-external-cards.py _site/index.html
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
