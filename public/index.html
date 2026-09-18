@@ -6,22 +6,27 @@
   <title>Utility Page Directory</title>
   <style>
     :root {
-      /* Default: white theme */
+      color-scheme: light dark;
       --bg: #ffffff;
       --card: #f8fafc;
       --text: #0f172a;
       --muted: #475569;
       --accent: #2563eb;
+      --card-border: rgba(0,0,0,.08);
+      --card-shadow: 0 10px 30px rgba(0,0,0,.10);
       --radius: 12px;
     }
 
-    /* Dark theme override */
-    :root[data-theme="dark"] {
-      --bg: #0b0f1a;
-      --card: #111827;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #60a5fa;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0f1a;
+        --card: #111827;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #60a5fa;
+        --card-border: rgba(255,255,255,.08);
+        --card-shadow: 0 10px 30px rgba(0,0,0,.35);
+      }
     }
 
     * { box-sizing: border-box; }
@@ -59,13 +64,8 @@
       background: var(--card);
       border-radius: var(--radius);
       padding: 16px;
-      border: 1px solid rgba(0,0,0,.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,.10);
-    }
-
-    :root[data-theme="dark"] .card {
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--card-shadow);
     }
 
     .card h2 {
@@ -91,87 +91,9 @@
 
     .card a:hover { text-decoration: underline; }
 
-    /* Unobtrusive theme toggle */
-    .theme-toggle {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 10;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.75);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 8px 20px rgba(0,0,0,.10);
-      color: var(--text);
-      font-size: 12px;
-      user-select: none;
-    }
-
-    :root[data-theme="dark"] .theme-toggle {
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(17,24,39,.72);
-      box-shadow: 0 8px 20px rgba(0,0,0,.35);
-    }
-
-    .theme-toggle input {
-      width: 38px;
-      height: 22px;
-      appearance: none;
-      -webkit-appearance: none;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.18);
-      background: rgba(0,0,0,.10);
-      position: relative;
-      cursor: pointer;
-      outline: none;
-    }
-
-    :root[data-theme="dark"] .theme-toggle input {
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.14);
-    }
-
-    .theme-toggle input::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      transform: translateY(-50%);
-      border-radius: 50%;
-      background: var(--text);
-      opacity: .85;
-      transition: left .15s ease;
-    }
-
-    :root[data-theme="dark"] .theme-toggle input::after {
-      background: #e5e7eb;
-      opacity: .9;
-    }
-
-    .theme-toggle input:checked::after {
-      left: 19px;
-    }
-
-    .theme-toggle .label {
-      white-space: nowrap;
-      color: var(--muted);
-    }
   </style>
 </head>
 <body>
-  <!-- Unobtrusive theme selector (default: white) -->
-  <label class="theme-toggle" aria-label="Theme">
-    <span class="label">Dark</span>
-    <input id="themeSwitch" type="checkbox" role="switch" aria-label="Toggle dark theme" />
-  </label>
-
   <h1>Utility Page Directory</h1>
   <p class="lead">Quick links to the standalone tools in this folder. Each card explains what the page does and links directly to the HTML file.</p>
 
@@ -214,33 +136,5 @@
 
     <!-- External repository cards -->
   </div>
-
-  <script>
-    (function () {
-      const STORAGE_KEY = "githubPages.utilityDirTheme"; // "light" | "dark"
-      const root = document.documentElement;
-      const themeSwitch = document.getElementById("themeSwitch");
-
-      function applyTheme(theme) {
-        if (theme === "dark") {
-          root.setAttribute("data-theme", "dark");
-          themeSwitch.checked = true;
-        } else {
-          root.removeAttribute("data-theme");
-          themeSwitch.checked = false;
-        }
-      }
-
-      // Default is white (light). Only apply dark if user previously chose it.
-      const saved = localStorage.getItem(STORAGE_KEY);
-      applyTheme(saved === "dark" ? "dark" : "light");
-
-      themeSwitch.addEventListener("change", () => {
-        const theme = themeSwitch.checked ? "dark" : "light";
-        localStorage.setItem(STORAGE_KEY, theme);
-        applyTheme(theme);
-      });
-    })();
-  </script>
 </body>
 </html>
